@@ -17,14 +17,29 @@ namespace SCaddins.NullCarbon.Update
     /// </summary>
     internal static class NullCarbonUpdater
     {
+        // Session-level snooze. If the user clicks "Later" once, we won't
+        // pester them again from background checks (Revit-startup task) for
+        // the rest of this Revit session. A manual click of the "Check for
+        // updates" link bypasses this and always runs.
+        private static bool sessionSnoozed;
+
         public static void CheckForUpdates(bool quietIfNotNewer)
         {
+            // Background callers (quietIfNotNewer=true) respect the snooze
+            // flag. Manual callers (quietIfNotNewer=false) always run -- the
+            // user explicitly asked.
+            if (quietIfNotNewer && sessionSnoozed)
+            {
+                Debug.WriteLine("nullCarbon updater: skipped (session-snoozed)");
+                return;
+            }
+
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
             LatestVersion latest;
             try
             {
-                latest = FetchLatestVersion();
+                latest = FetchLatestVersionWithRetry();
             }
             catch (Exception ex)
             {
@@ -73,6 +88,10 @@ namespace SCaddins.NullCarbon.Update
 
             if (!ConfirmInstall(installed, available, latest.body))
             {
+                // User clicked "Later". Snooze for the rest of this Revit
+                // session so the background check doesn't re-pester them.
+                // The next Revit start (or a manual click) will re-prompt.
+                sessionSnoozed = true;
                 return;
             }
 
@@ -91,6 +110,24 @@ namespace SCaddins.NullCarbon.Update
         }
 
         // ---- HTTP fetch -----------------------------------------------------
+
+        // Single retry on transient failures. Most update-check failures we
+        // see in practice are flaky DNS, captive portals, or a 5xx from
+        // GitHub. One retry with a short backoff fixes the common cases
+        // without making startup feel slow when the network is genuinely down.
+        private static LatestVersion FetchLatestVersionWithRetry()
+        {
+            try
+            {
+                return FetchLatestVersion();
+            }
+            catch (Exception firstEx)
+            {
+                Debug.WriteLine("nullCarbon updater: first fetch failed (" + firstEx.GetType().Name + "), retrying once after 2s...");
+                System.Threading.Thread.Sleep(2000);
+                return FetchLatestVersion();
+            }
+        }
 
         private static LatestVersion FetchLatestVersion()
         {
@@ -179,16 +216,17 @@ namespace SCaddins.NullCarbon.Update
         private static void LaunchInstaller(string installerPath)
         {
             // Inno Setup flags:
-            //   /SILENT             - no wizard, just a progress window
+            //   /VERYSILENT         - no wizard AND no progress window (fully invisible)
+            //   /SUPPRESSMSGBOXES   - never show "click OK to continue" / error dialogs
             //   /CLOSEAPPLICATIONS  - close Revit before file replacement
-            //                         (the .iss already sets CloseApplications=yes)
+            //                         (the .iss also sets CloseApplications=yes)
             //   /NORESTART          - don't auto-restart Windows after install
             try
             {
                 Process.Start(new ProcessStartInfo
                 {
                     FileName        = installerPath,
-                    Arguments       = "/SILENT /CLOSEAPPLICATIONS /NORESTART",
+                    Arguments       = "/VERYSILENT /SUPPRESSMSGBOXES /CLOSEAPPLICATIONS /NORESTART",
                     UseShellExecute = true,
                 });
 

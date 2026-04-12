@@ -135,12 +135,24 @@
                            FontSize="12"
                            HorizontalAlignment="Center"
                            Margin="0,20,0,0"/>
-                <!-- Help text -->
-                <TextBlock Text="{Binding VersionLabel}"
-                           Foreground="#666666"
-                           FontSize="12"
-                           HorizontalAlignment="Center"
-                           Margin="0,20,0,0"/>
+                <!-- Version label + manual update check link -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                    <TextBlock Text="{Binding VersionLabel}"
+                               Foreground="#666666"
+                               FontSize="12"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="  -  "
+                               Foreground="#666666"
+                               FontSize="12"
+                               VerticalAlignment="Center"/>
+                    <TextBlock VerticalAlignment="Center">
+                        <Hyperlink Foreground="#1a355f"
+                                   FontSize="12"
+                                   cal:Message.Attach="CheckForUpdates">
+                            Check for updates
+                        </Hyperlink>
+                    </TextBlock>
+                </StackPanel>
             </StackPanel>
         </Border>
     </Grid>

@@ -79,6 +79,22 @@ namespace SCaddins.ExportSchedules.ViewModels
         // which is rewritten by scripts\release.ps1 -Version X.Y.Z.
         public string VersionLabel => "Build " + SCaddins.NullCarbon.Branding.VersionShort;
 
+        // Bound to the "Check for updates" Hyperlink in LoginView.xaml.
+        // Pass quietIfNotNewer:false so the user gets a confirmation dialog
+        // even when there's no update -- otherwise clicking the link with
+        // nothing to update would look broken.
+        public void CheckForUpdates()
+        {
+            try
+            {
+                SCaddins.NullCarbon.Update.NullCarbonUpdater.CheckForUpdates(quietIfNotNewer: false);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("nullCarbon updater (manual): " + ex.Message);
+            }
+        }
+
         // Called from XAML when the PasswordBox changes
         public void OnPasswordChanged(object source)
         {
