@@ -24,7 +24,8 @@
       "Read(//c/Program Files/Reference Assemblies/Microsoft/Framework/**)",
       "Read(//c/Program Files \\(x86\\)/Microsoft SDKs/**)",
       "Bash(python -c ':*)",
-      "Bash(grep -v \"Common\\\\\\\\.ViewModels\\\\\\\\.SettingsViewModel\\\\|Common\\\\\\\\.Settings\\\\\\\\.cs\")"
+      "Bash(grep -v \"Common\\\\\\\\.ViewModels\\\\\\\\.SettingsViewModel\\\\|Common\\\\\\\\.Settings\\\\\\\\.cs\")",
+      "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"scripts/release.ps1\" -Version 26.3.3 -Push)"
     ]
   }
 }
