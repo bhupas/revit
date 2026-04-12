@@ -54,6 +54,8 @@ git config merge.ours.driver true
 
 The `merge.ours.driver` line is **required**. Without it, `.gitattributes` rules are silently ignored and your `merge=ours` stable files will become conflict-resolution work.
 
+Also run **`do\0-install-prerequisites.cmd`** after every fresh clone -- it installs build tools AND runs `scripts\protect-upstream.ps1`, which locks down the `upstream` remote so you can never accidentally push to acnicholas/scaddins. Both layers (a broken push URL plus a `pre-push` hook) live under `.git/` and don't survive a re-clone, so re-running the installer is the safe way to restore them.
+
 ### Routine sync
 
 ```powershell

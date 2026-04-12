@@ -18,6 +18,13 @@ Just double-click **`0-install-prerequisites.cmd`**. It checks for and installs:
 - .NET Framework 4.8 Developer Pack (winget if available, otherwise opens the manual download page)
 - Inno Setup 6 (`winget install --id JRSoftware.InnoSetup`)
 
+It also runs `scripts\protect-upstream.ps1` as a final step, which:
+
+- Sets the `upstream` remote (acnicholas/scaddins) push URL to a clearly-broken value, so any `git push upstream` errors out immediately.
+- Installs a `pre-push` hook that refuses to push to any remote whose URL points at acnicholas/scaddins.
+
+Both protections live in `.git/` so they're per-clone. **Re-run `do\0-install-prerequisites.cmd` after every fresh clone of this repo** -- the install steps for already-installed tools are skipped, but the upstream protection gets re-applied.
+
 After it finishes, **close this terminal/Explorer window and re-open one** so PATH picks up the new tools. Then double-click `1-build.cmd`.
 
 ## Most common workflows

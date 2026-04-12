@@ -120,6 +120,10 @@ Install-IfMissing `
                (Test-Path 'C:\Program Files\Inno Setup 6\iscc.exe')
     }
 
+# --- Final step: lock down upstream pushes -----------------------------------
+Step "Locking down upstream push protection"
+& "$PSScriptRoot\protect-upstream.ps1"
+
 # --- Done --------------------------------------------------------------------
 Step "Done"
 Ok "All prerequisites checked / installed."
