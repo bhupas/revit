@@ -53,8 +53,10 @@ After it finishes, **close this terminal/Explorer window and re-open one** so PA
 2-installer.cmd
 
 :: I want to ship a new release publicly (interactive):
-3-release.cmd
+:: First sync master with whatever was just merged from dev, then run the wizard.
+git checkout master && git pull && do\3-release.cmd
 ::   wizard prompts for version + push y/n + confirms
+::   wizard refuses to run from any branch except master
 
 :: I want to see what upstream has changed (safe preview):
 4-sync.cmd

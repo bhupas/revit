@@ -25,7 +25,11 @@ upstream/master --> dev --> master --> tag v26.3.4 --> GitHub Release
 1. **Make a change**: branch off `dev`, work, push, open a PR targeting `dev`.
 2. **Merge to dev**: review (or self-review), merge the PR. CI builds it on `dev` to confirm.
 3. **Promote to master**: when `dev` is in a shippable state, open a PR `dev → master`. Merge it.
-4. **Release**: from `master`, run `do\3-release.cmd` (which refuses to run from any other branch). The wizard tags `vX.Y.Z`, pushes the tag, and `release.yml` publishes the GitHub Release with the installer attached.
+4. **Release**: switch to `master`, pull the merged commit, and run the release wizard:
+   ```cmd
+   git checkout master && git pull && do\3-release.cmd
+   ```
+   The wizard refuses to run from any other branch. It tags `vX.Y.Z`, pushes the tag, and `release.yml` publishes the GitHub Release with the installer attached.
 
 Upstream-sync PRs (from the weekly `sync-upstream.yml` workflow) automatically target `dev`, so you can review them and bake them in `dev` before they ever touch `master`.
 
@@ -75,5 +79,9 @@ The script is idempotent — running it twice is safe. Re-run it after any fresh
 See [`docs/RELEASING.md`](docs/RELEASING.md). The TL;DR:
 
 1. On `master` (after merging `dev` to `master`), edit `RELEASE_NOTES.md` and add a `## v<version>` section.
-2. Double-click `do\3-release.cmd`. The wizard prompts for the version, validates the release notes, builds, packages, tags, and pushes.
+2. From `master` (pull first), run the release wizard:
+   ```cmd
+   git checkout master && git pull && do\3-release.cmd
+   ```
+   The wizard prompts for the version, validates the release notes, builds, packages, tags, and pushes.
 3. The tag push triggers `.github/workflows/release.yml` which publishes the GitHub Release.

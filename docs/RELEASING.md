@@ -2,14 +2,41 @@
 
 ## TL;DR
 
-1. Add a new section to [`RELEASE_NOTES.md`](../RELEASE_NOTES.md) at the repo root:
-   ```markdown
-   ## v26.3.2 -- 2026-04-15
+After your work has landed on `dev` and been merged into `master` via PR (see [CONTRIBUTING.md](../CONTRIBUTING.md)), the actual release is three commands:
 
-   ### Fixed
-   - Whatever bug got fixed.
-   ```
-2. Double-click `do\3-release.cmd`. The wizard prompts for the version, verifies the notes are present, asks whether to push, and runs everything end-to-end.
+```cmd
+git checkout master
+git pull
+do\3-release.cmd
+```
+
+Or as a one-liner:
+
+```cmd
+git checkout master && git pull && do\3-release.cmd
+```
+
+The first two commands make sure your local `master` matches what's on GitHub (so the tag points at the right commit). The third launches the interactive release wizard, which:
+
+1. Refuses to run from anything except `master`.
+2. Prompts you for the new version (validates `MAJOR.MINOR.PATCH`).
+3. Checks `RELEASE_NOTES.md` for a matching `## v<version>` section -- if missing, opens Notepad so you can add one.
+4. Bumps the version in `src\SCaddins.csproj`.
+5. Builds Release2023 + Release2024 + Release2025 + Release2026.
+6. Packages the Inno Setup installer.
+7. Creates a `vX.Y.Z` git tag and pushes it.
+8. The tag push triggers [`.github/workflows/release.yml`](../.github/workflows/release.yml) which builds on a clean runner and publishes a GitHub Release with the installer attached AND the release notes from `RELEASE_NOTES.md`.
+
+Before any of that, add a new section to [`RELEASE_NOTES.md`](../RELEASE_NOTES.md):
+
+```markdown
+## v26.3.4 -- 2026-04-12
+
+### Fixed
+- Whatever bug got fixed.
+```
+
+(The wizard will refuse to ship without one and offer to open Notepad if missing.)
 
 That's it. Pushing the tag triggers [`.github/workflows/release.yml`](../.github/workflows/release.yml) which builds on a clean runner and publishes a GitHub Release with the installer attached AND the release notes from `RELEASE_NOTES.md`. Users get the update via the in-app one-click updater on their next Revit start.
 
