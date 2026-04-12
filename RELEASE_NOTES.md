@@ -9,10 +9,10 @@ This file is the single source of truth for what shows up in:
 
 Before running `do\3-release.cmd`, add a section at the top of this file with the version you're about to ship. The wizard refuses to release a version that doesn't have an entry here. The release workflow extracts the section between `## vX.Y.Z` and the next `## v...` heading and ships it as the release body.
 
-Format:
+Format (replace `X.Y.Z` with the real version, e.g. `26.3.3`):
 
 ```markdown
-## v26.3.2 — 2026-04-15
+## vX.Y.Z -- YYYY-MM-DD
 
 ### Added
 - New "Export to PDF" option in the export dialog.
@@ -24,9 +24,22 @@ Format:
 - Login window now remembers the last successful username.
 ```
 
-Section headings (`### Added`, `### Fixed`, `### Changed`, `### Removed`, `### Security`) follow the [Keep a Changelog](https://keepachangelog.com/) convention. They're optional — you can also write free-form prose under the version heading.
+Section headings (`### Added`, `### Fixed`, `### Changed`, `### Removed`, `### Security`) follow the [Keep a Changelog](https://keepachangelog.com/) convention. They are optional -- you can also write free-form prose under the version heading.
 
 Keep entries **short and user-facing**. The in-app updater dialog truncates to 600 characters, so put the most important things first.
+
+> The example above uses `vX.Y.Z` rather than a real version number on purpose. The extractor script (`scripts/extract-release-notes.ps1`) is also code-fence-aware so it ignores any `## v...` headings inside code blocks, but using a placeholder is belt-and-braces.
+
+---
+
+## v26.3.3 -- 2026-04-12
+
+### Fixed
+- Release notes extractor was not code-fence aware and shipped template prose instead of the actual release notes for v26.3.2.
+- `RELEASE_NOTES.md` template now uses a placeholder version (`vX.Y.Z`) in the example so a literal `## v26.3.2` heading inside the example code block can never collide with a real release.
+
+### Changed
+- Hardened the local git config: the `upstream` remote (acnicholas/scaddins) is now push-disabled and a `pre-push` hook also rejects any push attempt to it. Pushes to `origin` (bhupas/revit) are unaffected.
 
 ---
 

@@ -36,10 +36,20 @@ if (-not (Test-Path $NotesFile)) {
 
 $lines = Get-Content -Path $NotesFile -Encoding UTF8
 
-# Find the line index of "## vX.Y.Z" (with optional trailing date / text).
+# Find the line index of "## vX.Y.Z" (with optional trailing date / text),
+# IGNORING any lines that fall inside a fenced code block (``` ... ```).
+# Without the code-fence guard, an example "## v26.3.2 ..." inside a
+# template code block would be matched as a real heading and we'd ship
+# template prose instead of actual release notes.
 $escaped = [regex]::Escape($Version)
 $startHeader = -1
+$inFence = $false
 for ($i = 0; $i -lt $lines.Count; $i++) {
+    if ($lines[$i] -match '^\s*```') {
+        $inFence = -not $inFence
+        continue
+    }
+    if ($inFence) { continue }
     if ($lines[$i] -match "^##\s+v$escaped(\s|$)") {
         $startHeader = $i
         break
@@ -59,8 +69,16 @@ if ($CheckOnly) {
 }
 
 # Find the next "## v..." heading (or EOF) -- that's where this section ends.
+# Same code-fence guard as above so an example heading inside a code block
+# inside our section can't truncate it early.
 $endIdx = $lines.Count
+$inFence2 = $false
 for ($j = $startHeader + 1; $j -lt $lines.Count; $j++) {
+    if ($lines[$j] -match '^\s*```') {
+        $inFence2 = -not $inFence2
+        continue
+    }
+    if ($inFence2) { continue }
     if ($lines[$j] -match '^##\s+v\d') {
         $endIdx = $j
         break
@@ -73,10 +91,13 @@ $bodyLines = @()
 if ($startHeader + 1 -lt $endIdx) {
     $bodyLines = $lines[($startHeader + 1)..($endIdx - 1)]
 }
-while ($bodyLines.Count -gt 0 -and [string]::IsNullOrWhiteSpace($bodyLines[0])) {
+function Test-IsBlankOrHr($line) {
+    return [string]::IsNullOrWhiteSpace($line) -or ($line -match '^\s*---+\s*$')
+}
+while ($bodyLines.Count -gt 0 -and (Test-IsBlankOrHr $bodyLines[0])) {
     $bodyLines = $bodyLines[1..($bodyLines.Count - 1)]
 }
-while ($bodyLines.Count -gt 0 -and [string]::IsNullOrWhiteSpace($bodyLines[-1])) {
+while ($bodyLines.Count -gt 0 -and (Test-IsBlankOrHr $bodyLines[-1])) {
     $bodyLines = $bodyLines[0..($bodyLines.Count - 2)]
 }
 
