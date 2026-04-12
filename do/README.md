@@ -10,6 +10,16 @@ Five files in this folder. **Numbered in the order you'll typically use them.** 
 | **3** | **`3-release.cmd`** | **Interactive release wizard.** Prompts for version + push y/n + confirms, then does build + installer + tag + (push). | When you want to **ship a new version**. Replaces 1+2 — does it all. |
 | **4** | **`4-sync.cmd`** | **Interactive sync wizard.** Defaults to a safe dry-run preview; asks for explicit confirmation before doing a real merge. | Periodically. Or just let the weekly GitHub Action do it for you. |
 
+## Branch model (TL;DR)
+
+- **`master`** = release branch. Releases (`do\3-release.cmd`) refuse to run from any other branch.
+- **`dev`** = development branch. Day-to-day work lands here first.
+- **Feature branches** branch off `dev`, get PR'd back to `dev`.
+- **`dev` -> `master`** is its own PR, opened when `dev` is ready to release.
+- Upstream sync PRs auto-target `dev` (never `master` directly).
+
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for the full picture and the branch protection rules.
+
 ## First time on this machine
 
 Just double-click **`0-install-prerequisites.cmd`**. It checks for and installs:
@@ -17,6 +27,7 @@ Just double-click **`0-install-prerequisites.cmd`**. It checks for and installs:
 - .NET SDK 8 (`winget install --id Microsoft.DotNet.SDK.8`)
 - .NET Framework 4.8 Developer Pack (winget if available, otherwise opens the manual download page)
 - Inno Setup 6 (`winget install --id JRSoftware.InnoSetup`)
+- GitHub CLI (`winget install --id GitHub.cli`) -- used by `scripts\protect-branches.ps1`
 
 It also runs `scripts\protect-upstream.ps1` as a final step, which:
 

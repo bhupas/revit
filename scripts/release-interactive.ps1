@@ -18,6 +18,23 @@ function Ok($msg)   { Write-Host "    $msg" -ForegroundColor Green }
 function Warn($msg) { Write-Host "    $msg" -ForegroundColor Yellow }
 function Fail($msg) { Write-Host ""; Write-Host "ERROR: $msg" -ForegroundColor Red; exit 1 }
 
+# --- Branch check: releases only from master --------------------------------
+$currentBranch = (git rev-parse --abbrev-ref HEAD).Trim()
+if ($currentBranch -ne 'master') {
+    Write-Host ""
+    Fail @"
+Releases must be made from the 'master' branch.
+You are currently on '$currentBranch'.
+
+Switch with:
+    git checkout master
+    git pull origin master
+
+If your changes are on dev, merge them to master via a PR first:
+    https://github.com/bhupas/revit/compare/master...dev
+"@
+}
+
 # --- Read current version from csproj ----------------------------------------
 $csproj = "$RepoRoot\src\SCaddins.csproj"
 if (-not (Test-Path $csproj)) { Fail "src\SCaddins.csproj not found." }

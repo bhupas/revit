@@ -120,6 +120,18 @@ Install-IfMissing `
                (Test-Path 'C:\Program Files\Inno Setup 6\iscc.exe')
     }
 
+# --- 4) GitHub CLI -----------------------------------------------------------
+# Used by scripts\protect-branches.ps1 to apply branch protection rules.
+# Optional (you can apply them via the GitHub web UI instead) but the script
+# is idempotent and one-shot, so installing the CLI is the easier path.
+Install-IfMissing `
+    -DisplayName "GitHub CLI (gh)" `
+    -WingetId "GitHub.cli" `
+    -ManualUrl "https://cli.github.com/" `
+    -AlreadyInstalledTest {
+        return (Get-Command gh -ErrorAction SilentlyContinue) -ne $null
+    }
+
 # --- Final step: lock down upstream pushes -----------------------------------
 Step "Locking down upstream push protection"
 & "$PSScriptRoot\protect-upstream.ps1"

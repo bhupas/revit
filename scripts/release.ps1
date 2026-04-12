@@ -43,6 +43,24 @@ if ($Version -notmatch '^\d+\.\d+\.\d+$') {
 # --- Preflight ---------------------------------------------------------------
 if (-not (Test-Path "$RepoRoot\.git")) { Fail "Not a git repo." }
 
+# Releases must come from master so the tagged commit is part of the public,
+# stable history. Development happens on dev (or feature branches off dev),
+# which then merge into master via PR before tagging.
+$currentBranch = (git rev-parse --abbrev-ref HEAD).Trim()
+if ($currentBranch -ne 'master' -and -not $DryRun) {
+    Fail @"
+Releases must be made from the 'master' branch.
+You are currently on '$currentBranch'.
+
+Switch with:
+    git checkout master
+    git pull origin master
+
+If your changes are on dev, merge them to master via a PR first:
+    https://github.com/bhupas/revit/compare/master...dev
+"@
+}
+
 $dirty = git status --porcelain
 if ($dirty -and -not $DryRun) {
     Fail "Working tree is dirty. Commit or stash first."
