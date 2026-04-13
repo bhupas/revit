@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+#
+# Installer manifest for nullCarbon Revit Export.
+#
+# The MSI is a per-user WiX v5 build produced by scripts\build-installer.ps1.
+# It installs to %LocalAppData%\nullCarbon-LCA-Export\<year>\ without
+# elevation. The UpgradeCode below is pinned in setup\nullcarbon\nullcarbon-installer.wxs
+# and MUST stay stable across versions -- winget relies on it to match
+# future upgrades.
+#
+# ProductCode regenerates per build (WiX Component Guid="*"), so it is NOT
+# listed here. winget-releaser / wingetcreate will fill it in automatically
+# by inspecting the downloaded MSI at release time.
+
+PackageIdentifier: nullCarbon.RevitExport
+PackageVersion: 26.4.0
+
+InstallerType: wix
+Scope: user
+InstallModes:
+  - silent
+  - silentWithProgress
+UpgradeBehavior: install
+
+# Install switches for `winget install`. Match the silent flags
+# NullCarbonUpdater already passes to msiexec.
+InstallerSwitches:
+  Silent: /qn /norestart
+  SilentWithProgress: /passive /norestart
+
+# Release artifacts live under
+#   https://github.com/bhupas/revit/releases/download/v<version>/
+# and are named nullCarbon-LCA-Export-win64-<version>.msi.
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/bhupas/revit/releases/download/v26.4.0/nullCarbon-LCA-Export-win64-26.4.0.msi
+    InstallerSha256: 0000000000000000000000000000000000000000000000000000000000000000
+    UpgradeCode: B4F7A2E1-3C8D-4A5F-9E2B-7F1C8D3E5A92
+
+ReleaseDate: 2026-04-13
+ManifestType: installer
+ManifestVersion: 1.6.0

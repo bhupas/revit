@@ -1,4 +1,4 @@
-﻿namespace SCaddins.ExportSchedules.Views
+﻿namespace SCaddins.NullCarbon.Login.Views
 {
     using System.Windows;
 
@@ -7,11 +7,6 @@
         public LoginView()
         {
             InitializeComponent();
-        }
-
-        private void Button_Click()
-        {
-
         }
     }
 }

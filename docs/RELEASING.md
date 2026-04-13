@@ -80,7 +80,7 @@ This single WiX v5 MSI (built from [`setup/nullcarbon/nullcarbon-installer.wxs`]
 
 It:
 
-- Installs per-user under `%LocalAppData%\Studio.SC\nullCarbon-LCA-Export\<year>\` — **no admin needed, no UAC prompt**.
+- Installs per-user under `%LocalAppData%\nullCarbon-LCA-Export\<year>\` — **no admin needed, no UAC prompt**.
 - Drops a `nullCarbon-LCA-Export.addin` manifest into `%AppData%\Autodesk\Revit\Addins\<year>\` for each ticked version.
 - Uses `<MajorUpgrade />` so new MSIs cleanly replace older ones. The default WiX MigrateFeatures behaviour preserves the user's feature selection across upgrades, so the silent auto-updater never re-installs Revit years they previously turned off.
 - Relies on Windows Restart Manager to gracefully close Revit before replacing files when `msiexec /i ... /qn` runs.

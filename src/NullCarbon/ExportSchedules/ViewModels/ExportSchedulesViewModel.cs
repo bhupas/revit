@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using SCaddins.ExportSchedules.Models;
 using SCaddins.ExportSchedules.Services;
+using SCaddins.NullCarbon.Login.ViewModels;
 using ProjectExportSettingsModel = SCaddins.ExportSchedules.Models.ProjectExportSettings;
 using System;
 using System.Collections.Generic;
@@ -707,31 +708,43 @@ namespace SCaddins.ExportSchedules.ViewModels
 
         public async Task LoginCommand()
         {
-            if (IsLoggedIn)
+            try
             {
-                // If already logged in, sign out
+                if (IsLoggedIn)
+                {
+                    // If already logged in, sign out
+                    TokenCache.AccessToken = null;
+                    TokenCache.RefreshToken = null;
+                    IsLoggedIn = false;
+                    return;
+                }
+
+                // Clear previous tokens to ensure a fresh login attempt.
                 TokenCache.AccessToken = null;
                 TokenCache.RefreshToken = null;
-                IsLoggedIn = false;
-                return;
+
+                // Create the LoginViewModel and show the login dialog.
+                var vm = new LoginViewModel();
+                await SCaddinsApp.WindowManager.ShowDialogAsync(vm, null, LoginViewModel.DefaultWindowSettings);
+
+                // After the dialog closes, check if a token was returned.
+                if (!string.IsNullOrEmpty(TokenCache.AccessToken))
+                {
+                    IsLoggedIn = true; // This will trigger LoadTeamsAsync()
+                }
+                else
+                {
+                    SCaddinsApp.WindowManager.ShowMessageBox("Loginfejl eller blev annulleret");
+                }
             }
-
-            // Clear previous tokens to ensure a fresh login attempt.
-            TokenCache.AccessToken = null;
-            TokenCache.RefreshToken = null;
-
-            // Create the LoginViewModel and show the login dialog.
-            var vm = new LoginViewModel();
-            await SCaddinsApp.WindowManager.ShowDialogAsync(vm);
-
-            // After the dialog closes, check if a token was returned.
-            if (!string.IsNullOrEmpty(TokenCache.AccessToken))
+            catch (Exception ex)
             {
-                IsLoggedIn = true; // This will trigger LoadTeamsAsync()
-            }
-            else
-            {
-                SCaddinsApp.WindowManager.ShowMessageBox("Loginfejl eller blev annulleret");
+                // Without this catch, any XAML-load / view-locator / theming
+                // exception in the dialog pipeline is swallowed by Caliburn's
+                // async action-message handler and the user just sees nothing.
+                SCaddinsApp.WindowManager.ShowErrorMessageBox(
+                    "Login error",
+                    ex.ToString());
             }
         }
 

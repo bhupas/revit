@@ -32,6 +32,20 @@ Keep entries **short and user-facing**. The in-app updater dialog truncates to 6
 
 ---
 
+## v26.4.0 -- 2026-04-13
+
+### Changed
+- **BREAKING: install path simplified.** The per-user install now lives at `%LocalAppData%\nullCarbon-LCA-Export\<year>\` — the old `Studio.SC\` parent folder is gone. `MajorUpgrade` sweeps the old tree automatically on upgrade; no user action needed.
+- **Revit ribbon tab renamed.** The tab that hosts the **nullCarbon Export** button is now called **nullCarbon** (was `Studio.SC`). Any saved ribbon customisation referencing the old tab will reset on first launch.
+- **Installer UI branded.** The MSI's Welcome, Finish, and progress dialogs now show the nullCarbon logo (custom banner + dialog bitmaps) instead of the stock WixUI blue gradient.
+
+### Added
+- **Logo in every dialog's title bar.** Every WPF window the plugin shows (login, export, options) now displays the nullCarbon logo in its title bar icon slot.
+- **winget distribution.** `winget install nullCarbon.RevitExport` installs the plugin on any Windows machine once the inaugural `microsoft/winget-pkgs` PR is merged.
+
+### Fixed
+- **Login window now opens.** Clicking **Login** in the export panel previously did nothing — any XAML / view-locator exception was swallowed by Caliburn's async action-message handler. The dialog now opens correctly, and any remaining failure surfaces as a visible error TaskDialog instead of a silent no-op.
+
 ## v26.3.4 -- 2026-04-13
 
 ### Changed

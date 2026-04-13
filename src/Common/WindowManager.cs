@@ -27,6 +27,27 @@ namespace SCaddins.Common
             get; set;
         }
 
+        // Cached once per process so every dialog doesn't re-decode the PNG.
+        private static System.Windows.Media.ImageSource cachedNullCarbonIcon;
+
+        private static System.Windows.Media.ImageSource GetNullCarbonIcon()
+        {
+            if (cachedNullCarbonIcon != null)
+            {
+                return cachedNullCarbonIcon;
+            }
+            try
+            {
+                var uri = new Uri("pack://application:,,,/SCaddins;component/Assets/nullcarbon-logo-64.png", UriKind.Absolute);
+                cachedNullCarbonIcon = new System.Windows.Media.Imaging.BitmapImage(uri);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("nullCarbon icon load failed: " + ex.Message);
+            }
+            return cachedNullCarbonIcon;
+        }
+
         public double Left
         {
             get; private set;
@@ -53,6 +74,10 @@ namespace SCaddins.Common
             if (window == null)
             {
                 return false;
+            }
+            if (window.Icon == null)
+            {
+                window.Icon = GetNullCarbonIcon();
             }
             System.Windows.Interop.WindowInteropHelper helper = new System.Windows.Interop.WindowInteropHelper(window);
             ApplicationThemeManager.Apply(window);
@@ -144,6 +169,10 @@ namespace SCaddins.Common
             System.Windows.Window window = await CreateWindowAsync(rootModel, false, context, settings);
             if (window != null)
             {
+                if (window.Icon == null)
+                {
+                    window.Icon = GetNullCarbonIcon();
+                }
                 System.Windows.Interop.WindowInteropHelper helper = new System.Windows.Interop.WindowInteropHelper(window);
                 helper.Owner = Autodesk.Windows.ComponentManager.ApplicationWindow;
                 ApplicationThemeManager.Apply(window);
@@ -160,6 +189,10 @@ namespace SCaddins.Common
             System.Windows.Window window = await CreateWindowAsync(rootModel, true, context, settings);
             if (window != null)
             {
+                if (window.Icon == null)
+                {
+                    window.Icon = GetNullCarbonIcon();
+                }
                 System.Windows.Interop.WindowInteropHelper helper = new System.Windows.Interop.WindowInteropHelper(window);
                 helper.Owner = Autodesk.Windows.ComponentManager.ApplicationWindow;
                 ApplicationThemeManager.Apply(window);

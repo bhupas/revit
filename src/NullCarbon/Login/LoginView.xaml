@@ -1,11 +1,13 @@
-﻿<Window x:Class="SCaddins.ExportSchedules.Views.LoginView"
+﻿<Window x:Class="SCaddins.NullCarbon.Login.Views.LoginView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:cal="http://www.caliburnproject.org"
-        Title="Log ind til nullCarbon" 
+        Title="Log ind til nullCarbon"
         Height="580" Width="500"
         WindowStartupLocation="CenterScreen"
-        WindowStyle="ToolWindow">
+        ResizeMode="NoResize"
+        ShowInTaskbar="True"
+        Icon="/SCaddins;component/Assets/nullcarbon-logo-64.png">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

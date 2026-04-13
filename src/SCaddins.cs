@@ -289,15 +289,15 @@ namespace SCaddins
 
             try
             {
-                application.CreateRibbonTab("Studio.SC");
+                application.CreateRibbonTab("nullCarbon");
             }
-            catch { /* Studio.SC Tab may already exist */ }
+            catch { /* nullCarbon Tab may already exist */ }
 
-            scaddinsRibbonPanel = TryGetPanel(application, "SCaddins", "Studio.SC");
-            createRibbonPanel = TryGetPanel(application, "Create", "Studio.SC");
-            modifyRibbonPanel = TryGetPanel(application, "Modify", "Studio.SC");
-            viewRibbonPanel = TryGetPanel(application, "View", "Studio.SC");
-            aboutRibbonPanel = TryGetPanel(application, "About", "Studio.SC");
+            scaddinsRibbonPanel = TryGetPanel(application, "SCaddins", "nullCarbon");
+            createRibbonPanel = TryGetPanel(application, "Create", "nullCarbon");
+            modifyRibbonPanel = TryGetPanel(application, "Modify", "nullCarbon");
+            viewRibbonPanel = TryGetPanel(application, "View", "nullCarbon");
+            aboutRibbonPanel = TryGetPanel(application, "About", "nullCarbon");
 
             if (scaddinsRibbonPanel == null || createRibbonPanel == null || viewRibbonPanel == null || aboutRibbonPanel == null || modifyRibbonPanel == null) 
             {

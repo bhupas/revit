@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Reflection;
@@ -8,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace SCaddins.ExportSchedules.ViewModels
+namespace SCaddins.NullCarbon.Login.ViewModels
 {
     public class LoginViewModel : Screen
     {
@@ -16,6 +17,22 @@ namespace SCaddins.ExportSchedules.ViewModels
         private string password;
         private string statusMessage;
         private bool isLoggingIn;
+
+        // Matches the shape every other ShowDialogAsync callsite in the repo
+        // uses. LoginCommand passes this to SCaddinsApp.WindowManager.ShowDialogAsync
+        // so the host window is sized and titled explicitly instead of relying
+        // on Caliburn's auto-wrap defaults (which historically caused the
+        // dialog to never appear from Revit's async action-message path).
+        public static IDictionary<string, object> DefaultWindowSettings => new Dictionary<string, object>
+        {
+            { "Title", "Log ind til nullCarbon" },
+            { "SizeToContent", System.Windows.SizeToContent.Manual },
+            { "Width", 500.0 },
+            { "Height", 580.0 },
+            { "ResizeMode", System.Windows.ResizeMode.NoResize },
+            { "WindowStartupLocation", System.Windows.WindowStartupLocation.CenterScreen },
+            { "ShowInTaskbar", true },
+        };
 
         public string Username
         {

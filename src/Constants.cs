@@ -35,7 +35,7 @@ namespace SCaddins
             "https://github.com/bhupas/revit/wiki";
 
         /// <summary> The install dir (per-user, no admin needed). </summary>
-		public static string InstallDirectory = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData), @"Studio.SC\nullCarbon-LCA-Export");
+		public static string InstallDirectory = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData), "nullCarbon-LCA-Export");
 
         /// <summary> Data directory. </summary>
         public const string ShareDirectory = "share";

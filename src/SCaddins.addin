@@ -4,7 +4,7 @@
   <!-- nullCarbon Revit Export -->
 
   <AddIn Type="Application">
-    <Assembly>..\..\..\..\..\Local\Studio.SC\nullCarbon-LCA-Export\_REVIT_VERSION_\SCaddins.dll</Assembly>
+    <Assembly>..\..\..\..\..\Local\nullCarbon-LCA-Export\_REVIT_VERSION_\SCaddins.dll</Assembly>
     <AddInId>DE9AB48F-CEFB-445F-9FED-408B5980EB0A</AddInId>
     <FullClassName>SCaddins.SCaddinsApp</FullClassName>
     <Name>nullCarbon-LCA-Export</Name>

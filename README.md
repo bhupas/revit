@@ -13,7 +13,7 @@ Built on top of [acnicholas/scaddins](https://github.com/acnicholas/scaddins) (L
 ## For users — install
 
 1. Download `nullCarbon-LCA-Export-win64-<version>.msi` from the [latest release](https://github.com/bhupas/revit/releases/latest).
-2. Double-click it. **No admin rights needed** — installs per-user under `%LocalAppData%\Studio.SC\nullCarbon-LCA-Export\`, no UAC prompt.
+2. Double-click it. **No admin rights needed** — installs per-user under `%LocalAppData%\nullCarbon-LCA-Export\`, no UAC prompt.
 3. Read and accept the **License Agreement** (LGPL-3.0-or-later).
 4. On the **Custom Setup** page, tick the Revit versions you want to install for (any combination of 2023 / 2024 / 2025 / 2026). Defaults to all bundled versions.
 5. Start Revit. Look for the **nullCarbon** ribbon panel with the **nullCarbon Export** button.
