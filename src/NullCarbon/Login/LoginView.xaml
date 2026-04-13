@@ -150,7 +150,7 @@
                     <TextBlock VerticalAlignment="Center">
                         <Hyperlink Foreground="#1a355f"
                                    FontSize="12"
-                                   cal:Message.Attach="CheckForUpdates">
+                                   Click="CheckForUpdatesHyperlink_Click">
                             Check for updates
                         </Hyperlink>
                     </TextBlock>

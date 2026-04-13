@@ -32,6 +32,13 @@ Keep entries **short and user-facing**. The in-app updater dialog truncates to 6
 
 ---
 
+## v26.4.1 -- 2026-04-13
+
+### Fixed
+- **Login window now actually opens.** v26.4.0 shipped the title-bar and window-settings fix but still crashed on construction because the "Check for updates" `<Hyperlink>` inside `LoginView` had a `cal:Message.Attach` — Caliburn.Micro's `ActionMessage` can only attach to `FrameworkElement`, and `Hyperlink` is a `FrameworkContentElement`. Replaced with a plain WPF `Click` handler in the code-behind that forwards to the viewmodel through `DataContext`.
+- **Installer banner text is readable.** The License Agreement, Custom Setup, Verify, and Progress dialogs were drawing their WiX-native title ("End-User License Agreement", etc.) on top of the wordmark in our banner bitmap. Regenerated the banner with the logo pinned to the far right and the left ~370 px kept pure white so WiX's own text has a clean canvas.
+- **nullCarbon logo reliably shows in every addon title bar.** v26.4.0's central icon loader used a `pack://application:,,,` URI which is unreliable in Revit's hosted WPF context (no `Application.Current`). Switched to `GetManifestResourceStream` with the logo explicitly registered as an `EmbeddedResource` with a pinned `LogicalName` — same mechanism the ribbon icons already use.
+
 ## v26.4.0 -- 2026-04-13
 
 ### Changed

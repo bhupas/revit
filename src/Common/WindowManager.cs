@@ -30,6 +30,12 @@ namespace SCaddins.Common
         // Cached once per process so every dialog doesn't re-decode the PNG.
         private static System.Windows.Media.ImageSource cachedNullCarbonIcon;
 
+        // Loads the nullCarbon logo from the assembly manifest stream. We use
+        // GetManifestResourceStream instead of a pack://application:,,, URI
+        // because Revit hosts WPF without an Application object, and pack URIs
+        // can throw or return null in that context. The logo is explicitly
+        // added to the EmbeddedResource list in SCaddins.csproj with a pinned
+        // LogicalName so this lookup stays stable regardless of folder moves.
         private static System.Windows.Media.ImageSource GetNullCarbonIcon()
         {
             if (cachedNullCarbonIcon != null)
@@ -38,8 +44,22 @@ namespace SCaddins.Common
             }
             try
             {
-                var uri = new Uri("pack://application:,,,/SCaddins;component/Assets/nullcarbon-logo-64.png", UriKind.Absolute);
-                cachedNullCarbonIcon = new System.Windows.Media.Imaging.BitmapImage(uri);
+                var asm = typeof(WindowManager).Assembly;
+                using (var stream = asm.GetManifestResourceStream("SCaddins.Assets.nullcarbon-logo-64.png"))
+                {
+                    if (stream == null)
+                    {
+                        System.Diagnostics.Debug.WriteLine("nullCarbon icon: embedded resource 'SCaddins.Assets.nullcarbon-logo-64.png' not found");
+                        return null;
+                    }
+                    var bmp = new System.Windows.Media.Imaging.BitmapImage();
+                    bmp.BeginInit();
+                    bmp.StreamSource = stream;
+                    bmp.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                    bmp.EndInit();
+                    bmp.Freeze();
+                    cachedNullCarbonIcon = bmp;
+                }
             }
             catch (Exception ex)
             {

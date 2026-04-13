@@ -107,6 +107,12 @@
     <Resource Include="Assets\*.bmp" />
     <Resource Include="Assets\*.png" />
     <EmbeddedResource Include="Assets\Ribbon\*.png" />
+    <!-- Logo is also embedded as a manifest resource so Common.WindowManager
+         can load it via GetManifestResourceStream in Revit's hosted WPF
+         context, where pack:// URIs are unreliable (no Application.Current). -->
+    <EmbeddedResource Include="Assets\nullcarbon-logo-64.png">
+      <LogicalName>SCaddins.Assets.nullcarbon-logo-64.png</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   
   <ItemGroup>

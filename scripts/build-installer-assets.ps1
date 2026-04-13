@@ -6,10 +6,14 @@
 # setup\nullcarbon\ and consumed at install time via WixUIBannerBmp /
 # WixUIDialogBmp WixVariables in nullcarbon-installer.wxs.
 #
-#   Banner : 493 x 58  px, 24-bit BMP, white background, logo on the left.
+#   Banner : 493 x 58  px, 24-bit BMP, white background, logo pinned to the
+#            FAR RIGHT. The left ~370 px are kept pure white because WiX
+#            draws its dialog title ("End-User License Agreement", etc.)
+#            and subtitle over the left portion of the banner on every
+#            interior dialog. Any art there collides with that text.
 #   Dialog : 493 x 312 px, 24-bit BMP, white background, logo in the left
-#            third; the right ~200 px are left blank because WiX draws
-#            the Welcome / Finish text over that region.
+#            third; the right ~300 px are left blank because WiX draws
+#            the Welcome / Finish body text over that region.
 #
 # Usage:
 #     scripts\build-installer-assets.ps1
@@ -48,7 +52,7 @@ function Save-Bmp24 {
     $Bitmap.Save($Path, [System.Drawing.Imaging.ImageFormat]::Bmp)
 }
 
-function Draw-Logo {
+function drawLogo {
     param(
         [System.Drawing.Graphics]$Graphics,
         [System.Drawing.Image]$Logo,
@@ -61,8 +65,10 @@ function Draw-Logo {
 }
 
 # ---------------------------------------------------------------------------
-# Banner: 493 x 58, logo on the left, "nullCarbon Revit Export" wordmark next
-# to it, 1 px hairline bottom border.
+# Banner: 493 x 58. Pure white left half -- WiX draws its own dialog title
+# ("End-User License Agreement" / "Custom Setup" / etc.) and subtitle over
+# that area, so anything we put there collides visually with the text. Only
+# the far right edge gets the logo. 1 px hairline bottom border.
 # ---------------------------------------------------------------------------
 $bannerW = 493
 $bannerH = 58
@@ -71,20 +77,14 @@ $banner = New-Bmp24 $bannerW $bannerH
 $g = [System.Drawing.Graphics]::FromImage($banner)
 $g.Clear([System.Drawing.Color]::White)
 
-# Logo: 40 px tall, 9 px top+bottom margin, 14 px left margin
-Draw-Logo -Graphics $g -Logo $logo -X 14 -Y 9 -Size 40
+# Logo pinned to the right. 42 px tall (8 px top+bottom margin in the 58 px
+# banner), 12 px right margin. Starts at x = 493 - 12 - 42 = 439.
+$logoSize = 42
+$logoX    = $bannerW - 12 - $logoSize
+$logoY    = [math]::Floor(($bannerH - $logoSize) / 2)
+drawLogo -Graphics $g -Logo $logo -X $logoX -Y $logoY -Size $logoSize
 
-# Wordmark text
-$g.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::ClearTypeGridFit
-$titleFont = New-Object System.Drawing.Font 'Segoe UI', 15, ([System.Drawing.FontStyle]::Bold), ([System.Drawing.GraphicsUnit]::Pixel)
-$subFont   = New-Object System.Drawing.Font 'Segoe UI', 10, ([System.Drawing.FontStyle]::Regular), ([System.Drawing.GraphicsUnit]::Pixel)
-$titleBrush = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(26, 53, 95))  # #1a355f
-$subBrush   = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(102, 102, 102)) # #666
-
-$g.DrawString('nullCarbon Revit Export', $titleFont, $titleBrush, 64, 10)
-$g.DrawString('Per-user installer',       $subFont,   $subBrush,   65, 33)
-
-# 1 px bottom border
+# 1 px bottom border for visual separation from the dialog body.
 $borderPen = New-Object System.Drawing.Pen ([System.Drawing.Color]::FromArgb(221, 221, 221))
 $g.DrawLine($borderPen, 0, $bannerH - 1, $bannerW, $bannerH - 1)
 
@@ -108,7 +108,7 @@ $g.Clear([System.Drawing.Color]::White)
 $logoSize = 150
 $logoX    = [math]::Round((165 - $logoSize) / 2)   # ~8 px
 $logoY    = 55
-Draw-Logo -Graphics $g -Logo $logo -X $logoX -Y $logoY -Size $logoSize
+drawLogo -Graphics $g -Logo $logo -X $logoX -Y $logoY -Size $logoSize
 
 # Tagline under the logo. Two lines so we don't bleed into WiX's text area.
 $g.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::ClearTypeGridFit
