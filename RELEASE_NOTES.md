@@ -32,6 +32,12 @@ Keep entries **short and user-facing**. The in-app updater dialog truncates to 6
 
 ---
 
+## v26.4.2 -- 2026-04-13
+
+### Fixed
+- **Update check no longer crashes with "Could not load file or assembly 'System.Text.Json, Version=9.0.0.0'".** The updater's .NET 8 branch deserialized the GitHub Releases JSON via `System.Text.Json.JsonSerializer`, but Revit pre-loads a different `System.Text.Json` into the AppDomain and the fusion loader refused to bind the 9.0.0 assembly we shipped. Switched both framework branches to `Newtonsoft.Json` (already shipped and working), eliminating the dependency entirely.
+- **"Failed to load buildings: Unexpected character encountered while parsing value: {"** when fetching teams. `Building.Team` was declared as `string`, but the backend has switched the field to a nested object. The property is unused locally, so it's simply dropped and Newtonsoft now ignores the JSON field (its default behavior for unknown keys).
+
 ## v26.4.1 -- 2026-04-13
 
 ### Fixed

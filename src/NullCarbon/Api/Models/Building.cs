@@ -17,8 +17,13 @@ namespace SCaddins.ExportSchedules.Models
         [JsonProperty("id")]
         public string Id { get; set; }
 
-        [JsonProperty("team")]
-        public string Team { get; set; }
+        // "team" is intentionally NOT deserialized. The backend has switched
+        // this from a plain slug string to a nested object (id, slug, name),
+        // and Newtonsoft throws "Unexpected character encountered while
+        // parsing value: {" when it sees the object. Nothing in this project
+        // reads Building.Team, so the simplest fix is to drop the property
+        // and let Newtonsoft ignore the JSON field (that's its default
+        // behavior for unknown keys).
 
         [JsonProperty("structure")]
         public StructureDetails Structure { get; set; }

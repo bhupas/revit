@@ -132,6 +132,14 @@ namespace SCaddins.NullCarbon.Update
 
         private static LatestVersion FetchLatestVersion()
         {
+            // Deserialize with Newtonsoft.Json on BOTH framework targets. We used
+            // to call System.Text.Json.JsonSerializer.Deserialize on the .NET 8
+            // branch, but in Revit's hosted CLR the fusion loader failed to
+            // resolve System.Text.Json 9.0.0 at runtime despite the DLL being
+            // present in the install folder -- presumably because Revit pre-
+            // loads an older STJ into the AppDomain. Newtonsoft.Json is already
+            // shipped for the net48 branch and works fine on net8 too, so use
+            // it everywhere and avoid the assembly-load wart.
             string json;
 #if NET48
             var req = (HttpWebRequest)WebRequest.Create(Branding.LatestReleaseApi);
@@ -142,7 +150,6 @@ namespace SCaddins.NullCarbon.Update
             {
                 json = sr.ReadToEnd();
             }
-            return JsonConvert.DeserializeObject<LatestVersion>(json);
 #else
             using (var http = new HttpClient())
             {
@@ -152,9 +159,9 @@ namespace SCaddins.NullCarbon.Update
                 {
                     json = reader.ReadToEnd();
                 }
-                return System.Text.Json.JsonSerializer.Deserialize<LatestVersion>(json);
             }
 #endif
+            return JsonConvert.DeserializeObject<LatestVersion>(json);
         }
 
         // ---- Asset selection ------------------------------------------------
