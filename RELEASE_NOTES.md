@@ -32,6 +32,18 @@ Keep entries **short and user-facing**. The in-app updater dialog truncates to 6
 
 ---
 
+## v26.3.4 -- 2026-04-13
+
+### Changed
+- **Installer is now a per-user MSI** (`nullCarbon-LCA-Export-win64-<version>.msi`) instead of the old Inno Setup `.exe`. Same per-user install location (`%LocalAppData%\Studio.SC\nullCarbon-LCA-Export\`), no admin required, no UAC prompt.
+
+### Added
+- **License Agreement page**: the installer now shows a real LGPL-3.0 EULA (with nullCarbon and SCaddins copyrights) before any files are written. Read it, accept it, then proceed.
+- **Revit version picker**: the new "Custom Setup" page lets you tick which Revit versions (2023 / 2024 / 2025 / 2026) to install for. The auto-updater preserves your selection across updates -- silent upgrades will never re-install a Revit year you previously turned off.
+
+### Fixed
+- The in-app updater now downloads the `.msi` and runs it via `msiexec /qn /norestart` after a 3-second delay, giving Revit time to close cleanly so DLL handles aren't fighting the installer.
+
 ## v26.3.3 -- 2026-04-12
 
 ### Fixed
