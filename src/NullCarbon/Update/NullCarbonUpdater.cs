@@ -13,7 +13,8 @@ namespace SCaddins.NullCarbon.Update
     /// <summary>
     /// One-click updater for the nullCarbon Revit Export.
     /// Checks the fork's GitHub Releases for a newer version, prompts the user
-    /// with a Revit TaskDialog, downloads the Inno Setup installer, and runs it.
+    /// with a Revit TaskDialog, downloads the per-user MSI, and runs it
+    /// silently via msiexec.
     /// </summary>
     internal static class NullCarbonUpdater
     {
@@ -162,11 +163,11 @@ namespace SCaddins.NullCarbon.Update
         {
             if (latest == null || latest.assets == null || latest.assets.Count == 0) return null;
 
-            // Prefer the Inno Setup .exe matching Branding.PreferredAssetSuffix.
-            // Fall back to anything ending in .exe, then any first asset.
+            // Prefer the MSI matching Branding.PreferredAssetSuffix (".msi").
+            // Fall back to anything ending in .msi, then any first asset.
             return
                    latest.assets.FirstOrDefault(a => a.name != null && a.name.EndsWith(Branding.PreferredAssetSuffix, StringComparison.OrdinalIgnoreCase))
-                ?? latest.assets.FirstOrDefault(a => a.name != null && a.name.EndsWith(".exe",  StringComparison.OrdinalIgnoreCase))
+                ?? latest.assets.FirstOrDefault(a => a.name != null && a.name.EndsWith(".msi",  StringComparison.OrdinalIgnoreCase))
                 ?? latest.assets.FirstOrDefault();
         }
 
@@ -179,7 +180,7 @@ namespace SCaddins.NullCarbon.Update
         private static string SelectPreferredAssetName(LatestVersion latest)
         {
             var a = PickAsset(latest);
-            return (a != null && !string.IsNullOrEmpty(a.name)) ? a.name : "nullCarbon-LCA-Export.exe";
+            return (a != null && !string.IsNullOrEmpty(a.name)) ? a.name : "nullCarbon-LCA-Export.msi";
         }
 
         // ---- Download -------------------------------------------------------
@@ -215,28 +216,44 @@ namespace SCaddins.NullCarbon.Update
 
         private static void LaunchInstaller(string installerPath)
         {
-            // Inno Setup flags:
-            //   /VERYSILENT         - no wizard AND no progress window (fully invisible)
-            //   /SUPPRESSMSGBOXES   - never show "click OK to continue" / error dialogs
-            //   /CLOSEAPPLICATIONS  - close Revit before file replacement
-            //                         (the .iss also sets CloseApplications=yes)
-            //   /NORESTART          - don't auto-restart Windows after install
+            // We shell out to cmd.exe so msiexec starts in its own process tree,
+            // detached from Revit. The 3-second delay gives this Revit session
+            // time to close after the user dismisses our TaskDialog -- if
+            // msiexec were to start while Revit still held the addin DLLs,
+            // Restart Manager would have to force-close Revit mid-UI.
+            //
+            // msiexec flags:
+            //   /i <path>   install (or upgrade) this package
+            //   /qn         fully silent, no UI
+            //   /norestart  never trigger a Windows reboot
+            //
+            // The MSI is per-user -- no UAC elevation. Windows' Restart
+            // Manager (enabled by default) will still handle any lingering
+            // DLL locks gracefully.
             try
             {
+                var quoted = "\"" + installerPath + "\"";
+                var cmdLine =
+                    "/c timeout /t 3 /nobreak > NUL && " +
+                    "msiexec.exe /i " + quoted + " /qn /norestart";
+
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName        = installerPath,
-                    Arguments       = "/VERYSILENT /SUPPRESSMSGBOXES /CLOSEAPPLICATIONS /NORESTART",
+                    FileName        = "cmd.exe",
+                    Arguments       = cmdLine,
                     UseShellExecute = true,
+                    CreateNoWindow  = true,
+                    WindowStyle     = ProcessWindowStyle.Hidden,
                 });
 
                 ShowInfo(
-                    "The installer has been launched.\n\n" +
-                    "Revit will close automatically so the update can apply. Re-open Revit when the installer finishes.");
+                    "The update will install in a few seconds.\n\n" +
+                    "Please close Revit now so the new files can be written. " +
+                    "Re-open Revit afterwards to pick up the new version.");
             }
             catch (Exception ex)
             {
-                ShowError("Could not launch the installer:\n" + installerPath + "\n\n" + ex.Message);
+                ShowError("Could not launch msiexec for:\n" + installerPath + "\n\n" + ex.Message);
             }
         }
 

@@ -1,9 +1,10 @@
 # nullCarbon Revit Export -- one-shot first-time install of build prerequisites.
 #
-# Installs the three things you need to build the add-in:
+# Installs the things you need to build the add-in and package the MSI:
 #   - .NET SDK 8.x
 #   - .NET Framework 4.8 Developer Pack
-#   - Inno Setup 6
+#   - WiX v5 (installed as a dotnet global tool)
+#   - GitHub CLI (for branch protection / release scripts)
 #
 # Idempotent: each tool is checked first and skipped if already installed.
 # Run this once on a fresh machine, then close + re-open the terminal so PATH
@@ -109,16 +110,36 @@ if (Test-Path $net48Path) {
     }
 }
 
-# --- 3) Inno Setup 6 ---------------------------------------------------------
-Install-IfMissing `
-    -DisplayName "Inno Setup 6" `
-    -WingetId "JRSoftware.InnoSetup" `
-    -ManualUrl "https://jrsoftware.org/isinfo.php" `
-    -AlreadyInstalledTest {
-        if (Get-Command iscc -ErrorAction SilentlyContinue) { return $true }
-        return (Test-Path 'C:\Program Files (x86)\Inno Setup 6\iscc.exe') -or
-               (Test-Path 'C:\Program Files\Inno Setup 6\iscc.exe')
+# --- 3) WiX v5 (dotnet global tool) ------------------------------------------
+# WiX v5 is shipped as a dotnet tool, not a system installer. It lives in
+# %USERPROFILE%\.dotnet\tools\wix.exe once installed. scripts\build-installer.ps1
+# also self-heals by installing it on first run, but installing it up front
+# here means the first `do\2-installer.cmd` doesn't slow down with a tool
+# download.
+Step "WiX v5 (dotnet tool)"
+$dotnet = Get-Command dotnet -ErrorAction SilentlyContinue
+if (-not $dotnet) {
+    Warn "dotnet SDK is not on PATH yet (it was likely just installed)."
+    Warn "Close this terminal, open a new one, and re-run this script."
+} else {
+    $wixExe = Join-Path $env:USERPROFILE ".dotnet\tools\wix.exe"
+    if (Test-Path $wixExe) {
+        Skip "Already installed: $wixExe"
+    } else {
+        Write-Host "    Installing via: dotnet tool install --global wix"
+        & dotnet tool install --global wix 2>&1 | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            # Exit 1 usually means "already installed" -- try update instead.
+            & dotnet tool update --global wix 2>&1 | Out-Null
+        }
+        if (Test-Path $wixExe) {
+            Ok "Installed."
+        } else {
+            Warn "dotnet tool install wix did not produce $wixExe."
+            Warn "Install manually: dotnet tool install --global wix"
+        }
     }
+}
 
 # --- 4) GitHub CLI -----------------------------------------------------------
 # Used by scripts\protect-branches.ps1 to apply branch protection rules.

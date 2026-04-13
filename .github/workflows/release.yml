@@ -44,11 +44,20 @@ jobs:
         shell: pwsh
         run: scripts\build.ps1 -Clean
 
-      - name: Install Inno Setup
+      - name: Install WiX v5 + UI extension
         shell: pwsh
-        run: choco install innosetup --no-progress -y
+        run: |
+          # Pin to v5 -- v7 introduced a paid OSMF EULA that has to be
+          # accepted out of band. v5 is the last fully-free version.
+          dotnet tool install --global wix --version 5.0.2
+          "$env:USERPROFILE\.dotnet\tools" | Out-File -FilePath $env:GITHUB_PATH -Append
+          $env:PATH = "$env:USERPROFILE\.dotnet\tools;$env:PATH"
+          # WixUI_FeatureTree (license + feature picker dialogs) lives in
+          # the UI extension. wix build needs -ext WixToolset.UI.wixext, and
+          # the extension itself has to be added to the per-user cache first.
+          wix extension add --global WixToolset.UI.wixext/5.0.2
 
-      - name: Package installer
+      - name: Package installer (MSI)
         shell: pwsh
         run: scripts\build-installer.ps1 -Version ${{ steps.ver.outputs.version }}
 
@@ -56,7 +65,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: installer
-          path: setup/out/nullCarbon-LCA-Export-win64-${{ steps.ver.outputs.version }}.exe
+          path: setup/out/nullCarbon-LCA-Export-win64-${{ steps.ver.outputs.version }}.msi
           if-no-files-found: error
 
       - name: Extract release notes for ${{ steps.ver.outputs.version }}
@@ -77,4 +86,4 @@ jobs:
           append_body: true
           generate_release_notes: true
           files: |
-            setup/out/nullCarbon-LCA-Export-win64-${{ steps.ver.outputs.version }}.exe
+            setup/out/nullCarbon-LCA-Export-win64-${{ steps.ver.outputs.version }}.msi

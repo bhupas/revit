@@ -28,9 +28,9 @@ namespace SCaddins.NullCarbon
 
         // The updater downloads the first GitHub Release asset whose filename
         // ends with this suffix. Releases are produced by scripts\build-installer.ps1
-        // and named nullCarbon-LCA-Export-win64-<version>.exe — matching the
-        // upstream SCaddins installer naming convention.
-        public const string PreferredAssetSuffix = ".exe";
+        // and named nullCarbon-LCA-Export-win64-<version>.msi — a per-user
+        // WiX MSI that installs without UAC elevation.
+        public const string PreferredAssetSuffix = ".msi";
 
         // ---- Version (auto-read from assembly) -----------------------------
 

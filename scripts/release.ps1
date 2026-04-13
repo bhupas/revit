@@ -3,7 +3,7 @@
 # What this does:
 #   1. Bumps the version in src\SCaddins.csproj (AssemblyVersion + friends)
 #   2. Builds Release2024, Release2025, Release2026
-#   3. Packages the Inno Setup installer
+#   3. Packages the WiX MSI installer
 #   4. Creates a git tag (vX.Y.Z) and an annotated commit
 #   5. (Optional) Pushes the tag -- triggers .github\workflows\release.yml
 #
@@ -16,7 +16,7 @@
 # Notes:
 #   - Won't run if the working tree is dirty (commit/stash first).
 #   - The tag triggers GitHub Actions to publish a Release with assets if
-#     .github\workflows\release.yml is enabled and the runner has Inno Setup.
+#     .github\workflows\release.yml is enabled and the runner has WiX v5.
 
 [CmdletBinding()]
 param(
@@ -122,4 +122,4 @@ if ($Push) {
 }
 
 Step "Done"
-Ok "Installer: setup\out\nullCarbon-LCA-Export-win64-$Version.exe"
+Ok "Installer: setup\out\nullCarbon-LCA-Export-win64-$Version.msi"

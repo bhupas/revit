@@ -12,16 +12,17 @@ Built on top of [acnicholas/scaddins](https://github.com/acnicholas/scaddins) (L
 
 ## For users — install
 
-1. Download `nullCarbon-LCA-Export-win64-<version>.exe` from the [latest release](https://github.com/bhupas/revit/releases/latest).
-2. Run it. **No admin rights needed** — installs per-user under `%LocalAppData%\Studio.SC\nullCarbon-LCA-Export\`.
-3. On the components page, tick the Revit versions you want to install for (any combination of 2023 / 2024 / 2025 / 2026 — defaults to all).
-4. Start Revit. Look for the **nullCarbon** ribbon panel with the **nullCarbon Export** button.
+1. Download `nullCarbon-LCA-Export-win64-<version>.msi` from the [latest release](https://github.com/bhupas/revit/releases/latest).
+2. Double-click it. **No admin rights needed** — installs per-user under `%LocalAppData%\Studio.SC\nullCarbon-LCA-Export\`, no UAC prompt.
+3. Read and accept the **License Agreement** (LGPL-3.0-or-later).
+4. On the **Custom Setup** page, tick the Revit versions you want to install for (any combination of 2023 / 2024 / 2025 / 2026). Defaults to all bundled versions.
+5. Start Revit. Look for the **nullCarbon** ribbon panel with the **nullCarbon Export** button.
 
-**One installer covers every Revit version.** Same `.exe`, no separate per-Revit downloads, same file works for upgrades.
+**One MSI covers every Revit version.** Same `.msi`, no separate per-Revit downloads, same file works for upgrades.
 
 ### Updates
 
-You don't need to do anything. The add-in checks GitHub on every Revit start. If a newer version is found, you get a one-click **Update now** dialog. Click it → Revit closes → installer runs → re-open Revit on the new version.
+You don't need to do anything. The add-in checks GitHub on every Revit start. If a newer version is found, you get a one-click **Update now** dialog. Click it → close Revit → `msiexec` runs silently in the background → re-open Revit on the new version. The silent updater preserves the Revit-version selection you made on first install (MSI `MajorUpgrade` migrates feature state across versions), so it never re-installs Revit years you previously turned off.
 
 ---
 
@@ -32,7 +33,7 @@ Open the **`do\`** folder. There are exactly four files there, numbered. That's 
 | # | File | What it does |
 |---|---|---|
 | **1** | [`do\1-build.cmd`](do/1-build.cmd) | Builds the add-in for Revit 2023 + 2024 + 2025 + 2026. Output → `src\bin\Release<year>\` |
-| **2** | [`do\2-installer.cmd`](do/2-installer.cmd) | Packages the Inno Setup installer. Run **after** `1-build.cmd`. Output → `setup\out\nullCarbon-LCA-Export-win64-<version>.exe` |
+| **2** | [`do\2-installer.cmd`](do/2-installer.cmd) | Packages the WiX MSI installer. Run **after** `1-build.cmd`. Output → `setup\out\nullCarbon-LCA-Export-win64-<version>.msi` |
 | **3** | [`do\3-release.cmd`](do/3-release.cmd) | Bumps the version, builds, packages, tags, and (with `-Push`) publishes a GitHub Release. **The only command you need for shipping.** |
 | **4** | [`do\4-sync.cmd`](do/4-sync.cmd) | Pulls new commits from upstream SCaddins into a sync branch. Tells you about conflicts if any. |
 
@@ -45,7 +46,7 @@ See [`do\README.md`](do/README.md) for examples and the first-time install comma
 ```cmd
 winget install --id Microsoft.DotNet.SDK.8 --silent --accept-package-agreements --accept-source-agreements
 winget install --id Microsoft.DotNet.Framework.DeveloperPack_4 --silent --accept-package-agreements --accept-source-agreements
-winget install --id JRSoftware.InnoSetup --silent --accept-package-agreements --accept-source-agreements
+dotnet tool install --global wix
 ```
 
 After installing, **close any open terminal/Explorer window** and re-open one so PATH picks them up. Then double-click `do\1-build.cmd`.
@@ -69,8 +70,8 @@ That rewrites the version in the csproj, builds, packages, and (optionally) tags
 | Login window footer ("Build v26.3.2") | [`LoginViewModel.VersionLabel`](src/NullCarbon/Login/LoginViewModel.cs) → `Branding.VersionShort` → assembly |
 | Export window header (small subscript next to logo) | [`ExportSchedulesViewModel.VersionLabel`](src/NullCarbon/ExportSchedules/ViewModels/ExportSchedulesViewModel.cs) → `Branding.VersionShort` → assembly |
 | Ribbon button long-description / tooltip | [`NullCarbonModule.LoadExportButtonData`](src/NullCarbon/NullCarbonModule.cs) → `Branding.ProductWithVersion` → assembly |
-| Installer filename (`nullCarbon-LCA-Export-win64-26.3.2.exe`) | [`scripts\build-installer.ps1`](scripts/build-installer.ps1) reads it from the built DLL |
-| Installer Add/Remove Programs entry | Inno Setup is passed `MyAppVersion` by `build-installer.ps1` |
+| Installer filename (`nullCarbon-LCA-Export-win64-26.3.2.msi`) | [`scripts\build-installer.ps1`](scripts/build-installer.ps1) reads it from the built DLL |
+| Installer Add/Remove Programs entry | WiX is passed `Version` by `build-installer.ps1` (`-d Version=<version>`) |
 | GitHub release tag (`v26.3.2`) | `do\3-release.cmd -Version` creates the tag |
 | Updater "Available: 26.3.2" dialog | [`NullCarbonUpdater`](src/NullCarbon/Update/NullCarbonUpdater.cs) parses the GitHub tag |
 
@@ -123,10 +124,10 @@ src/
   LatestRelease.cs            untouched (GitHub Releases JSON model)
 
 setup/
-  nullcarbon/                 nullCarbon Inno Setup installer
-    nullcarbon-installer.iss
+  nullcarbon/                 nullCarbon WiX v5 MSI installer
+    nullcarbon-installer.wxs
+    nullcarbon-license.rtf      EULA shown by the installer (LGPL-3.0)
     nullcarbon.ico
-    nullcarbon-wizard.bmp
 
 scripts/                      PowerShell scripts that the do/*.cmd files wrap
   build.ps1

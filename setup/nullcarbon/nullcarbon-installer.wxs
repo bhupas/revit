@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  nullCarbon Revit Export. WiX v5 installer source.
+
+  Per-user MSI. No admin elevation, no UAC prompt. Matches the old Inno Setup
+  behavior (PrivilegesRequired=lowest) so the silent auto-updater keeps
+  running without popping a UAC dialog on every update.
+
+  Two install modes:
+
+  1. Interactive (user double-clicks the .msi):
+        Welcome -> EULA -> Feature tree -> Confirm -> Progress -> Finish
+        The Feature tree lets the user tick the Revit versions they want.
+
+  2. Silent (auto-updater runs `msiexec /i <file> /qn /norestart`):
+        No UI. MajorUpgrade preserves the feature selection from the
+        previous install so subsequent silent upgrades only touch the
+        Revit versions the user originally picked.
+
+  Layout:
+    %LocalAppData%\Studio.SC\nullCarbon-LCA-Export\          (main install)
+        nullcarbon.ico
+        2023\  *.dll  [+ Monaco\**]
+        2024\  *.dll  [+ Monaco\**]
+        2025\  *.dll  [+ Monaco\**]
+        2026\  *.dll  [+ Monaco\**]
+    %AppData%\Autodesk\Revit\Addins\2023\nullCarbon-LCA-Export.addin
+    %AppData%\Autodesk\Revit\Addins\2024\nullCarbon-LCA-Export.addin
+    %AppData%\Autodesk\Revit\Addins\2025\nullCarbon-LCA-Export.addin
+    %AppData%\Autodesk\Revit\Addins\2026\nullCarbon-LCA-Export.addin
+
+  Per-Revit-year content is gated by WiX preprocessor defines passed in by
+  scripts\build-installer.ps1 with -d R2023=Enabled etc. The DLL payload is
+  pre-staged by build-installer.ps1 into setup\out\stage\<year>\ with the
+  unwanted Revit API DLLs filtered out (WiX v5 Files element has no Exclude
+  attribute, so we filter in PowerShell first).
+
+  Build via:
+      do\2-installer.cmd                          (recommended, double-click)
+      scripts\build-installer.ps1                 (PowerShell wrapper)
+
+  Required wix extensions:
+      WixToolset.UI.wixext   (for WixUI_FeatureTree dialog set)
+-->
+
+<?ifndef Version  ?><?define Version  = "0.0.0"  ?><?endif?>
+<?ifndef R2023    ?><?define R2023    = "Disabled" ?><?endif?>
+<?ifndef R2024    ?><?define R2024    = "Disabled" ?><?endif?>
+<?ifndef R2025    ?><?define R2025    = "Disabled" ?><?endif?>
+<?ifndef R2026    ?><?define R2026    = "Disabled" ?><?endif?>
+<?ifndef StageDir ?><?define StageDir = "..\out\stage" ?><?endif?>
+
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+  <Package
+      Name="nullCarbon Revit Export"
+      Manufacturer="nullCarbon"
+      Version="$(var.Version)"
+      UpgradeCode="B4F7A2E1-3C8D-4A5F-9E2B-7F1C8D3E5A92"
+      Scope="perUser"
+      InstallerVersion="500"
+      Compressed="yes">
+
+    <SummaryInformation Description="nullCarbon Revit Export installer" />
+
+    <!-- Clean upgrade. Older MSIs are removed before new files are laid down,
+         so there's no file collision when the updater runs msiexec /i on a
+         newer version. MigrateFeatures (the WiX default) preserves the
+         feature selection across upgrades. -->
+    <MajorUpgrade
+        Schedule="afterInstallInitialize"
+        DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+    <Media Id="1" Cabinet="product.cab" EmbedCab="yes" CompressionLevel="high" />
+
+    <!-- Add/Remove Programs metadata. -->
+    <Icon Id="NullCarbonIcon.ico" SourceFile="nullcarbon.ico" />
+    <Property Id="ARPPRODUCTICON"   Value="NullCarbonIcon.ico" />
+    <Property Id="ARPURLINFOABOUT"  Value="https://github.com/bhupas/revit" />
+    <Property Id="ARPHELPLINK"      Value="https://github.com/bhupas/revit/issues" />
+    <Property Id="ARPURLUPDATEINFO" Value="https://github.com/bhupas/revit/releases/latest" />
+    <Property Id="ARPCONTACT"       Value="contact@nullcarbon.dk" />
+    <Property Id="ARPNOMODIFY"      Value="1" />
+    <Property Id="ARPNOREPAIR"      Value="1" />
+
+    <!-- Interactive UI: Welcome -> License -> FeatureTree -> Verify -> Progress -> Finish.
+         Suppressed entirely when msiexec is invoked with /qn (silent updater path). -->
+    <ui:WixUI Id="WixUI_FeatureTree" />
+    <UIRef Id="WixUI_ErrorProgressText" />
+    <WixVariable Id="WixUILicenseRtf" Value="nullcarbon-license.rtf" />
+
+    <!-- Directory tree. Everything is under per-user roots; no ProgramFiles,
+         no HKLM, no UAC. -->
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="StudioSCFolder" Name="Studio.SC">
+        <Directory Id="INSTALLFOLDER" Name="nullCarbon-LCA-Export">
+          <Directory Id="InstallFolder2023" Name="2023" />
+          <Directory Id="InstallFolder2024" Name="2024" />
+          <Directory Id="InstallFolder2025" Name="2025" />
+          <Directory Id="InstallFolder2026" Name="2026" />
+        </Directory>
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="AppDataFolder">
+      <Directory Id="AutodeskFolder" Name="Autodesk">
+        <Directory Id="RevitFolder" Name="Revit">
+          <Directory Id="RevitAddinsFolder" Name="Addins">
+            <Directory Id="RevitAddins2023" Name="2023" />
+            <Directory Id="RevitAddins2024" Name="2024" />
+            <Directory Id="RevitAddins2025" Name="2025" />
+            <Directory Id="RevitAddins2026" Name="2026" />
+          </Directory>
+        </Directory>
+      </Directory>
+    </StandardDirectory>
+
+    <!-- ============================================================== -->
+    <!-- Components and component groups                                  -->
+    <!-- ============================================================== -->
+
+    <!-- Always-installed icon (used for ARPPRODUCTICON). -->
+    <ComponentGroup Id="SharedGroup" Directory="INSTALLFOLDER">
+      <Component Id="IconFile" Guid="*">
+        <File Id="NullCarbonIconFile" Source="nullcarbon.ico" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <?if $(var.R2023) = "Enabled" ?>
+    <ComponentGroup Id="Revit2023AppGroup" Directory="InstallFolder2023">
+      <Files Include="$(var.StageDir)\2023\app\**" />
+    </ComponentGroup>
+    <ComponentGroup Id="Revit2023AddinGroup" Directory="RevitAddins2023">
+      <Component Id="Addin2023" Guid="*">
+        <File Id="Addin2023File"
+              Source="$(var.StageDir)\2023\addin\nullCarbon-LCA-Export.addin"
+              KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+    <?endif?>
+
+    <?if $(var.R2024) = "Enabled" ?>
+    <ComponentGroup Id="Revit2024AppGroup" Directory="InstallFolder2024">
+      <Files Include="$(var.StageDir)\2024\app\**" />
+    </ComponentGroup>
+    <ComponentGroup Id="Revit2024AddinGroup" Directory="RevitAddins2024">
+      <Component Id="Addin2024" Guid="*">
+        <File Id="Addin2024File"
+              Source="$(var.StageDir)\2024\addin\nullCarbon-LCA-Export.addin"
+              KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+    <?endif?>
+
+    <?if $(var.R2025) = "Enabled" ?>
+    <ComponentGroup Id="Revit2025AppGroup" Directory="InstallFolder2025">
+      <Files Include="$(var.StageDir)\2025\app\**" />
+    </ComponentGroup>
+    <ComponentGroup Id="Revit2025AddinGroup" Directory="RevitAddins2025">
+      <Component Id="Addin2025" Guid="*">
+        <File Id="Addin2025File"
+              Source="$(var.StageDir)\2025\addin\nullCarbon-LCA-Export.addin"
+              KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+    <?endif?>
+
+    <?if $(var.R2026) = "Enabled" ?>
+    <ComponentGroup Id="Revit2026AppGroup" Directory="InstallFolder2026">
+      <Files Include="$(var.StageDir)\2026\app\**" />
+    </ComponentGroup>
+    <ComponentGroup Id="Revit2026AddinGroup" Directory="RevitAddins2026">
+      <Component Id="Addin2026" Guid="*">
+        <File Id="Addin2026File"
+              Source="$(var.StageDir)\2026\addin\nullCarbon-LCA-Export.addin"
+              KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+    <?endif?>
+
+    <!-- ============================================================== -->
+    <!-- Feature tree (drives the Custom Setup dialog)                    -->
+    <!-- ============================================================== -->
+
+    <Feature Id="ProductFeature"
+             Title="nullCarbon Revit Export"
+             Description="Core add-in files (always installed)."
+             Display="expand"
+             Level="1"
+             AllowAdvertise="no"
+             AllowAbsent="no"
+             ConfigurableDirectory="INSTALLFOLDER">
+      <ComponentGroupRef Id="SharedGroup" />
+
+      <?if $(var.R2023) = "Enabled" ?>
+      <Feature Id="Revit2023Feature"
+               Title="Revit 2023"
+               Description="Install the nullCarbon Export ribbon for Autodesk Revit 2023."
+               Level="1"
+               AllowAdvertise="no">
+        <ComponentGroupRef Id="Revit2023AppGroup" />
+        <ComponentGroupRef Id="Revit2023AddinGroup" />
+      </Feature>
+      <?endif?>
+
+      <?if $(var.R2024) = "Enabled" ?>
+      <Feature Id="Revit2024Feature"
+               Title="Revit 2024"
+               Description="Install the nullCarbon Export ribbon for Autodesk Revit 2024."
+               Level="1"
+               AllowAdvertise="no">
+        <ComponentGroupRef Id="Revit2024AppGroup" />
+        <ComponentGroupRef Id="Revit2024AddinGroup" />
+      </Feature>
+      <?endif?>
+
+      <?if $(var.R2025) = "Enabled" ?>
+      <Feature Id="Revit2025Feature"
+               Title="Revit 2025"
+               Description="Install the nullCarbon Export ribbon for Autodesk Revit 2025."
+               Level="1"
+               AllowAdvertise="no">
+        <ComponentGroupRef Id="Revit2025AppGroup" />
+        <ComponentGroupRef Id="Revit2025AddinGroup" />
+      </Feature>
+      <?endif?>
+
+      <?if $(var.R2026) = "Enabled" ?>
+      <Feature Id="Revit2026Feature"
+               Title="Revit 2026"
+               Description="Install the nullCarbon Export ribbon for Autodesk Revit 2026."
+               Level="1"
+               AllowAdvertise="no">
+        <ComponentGroupRef Id="Revit2026AppGroup" />
+        <ComponentGroupRef Id="Revit2026AddinGroup" />
+      </Feature>
+      <?endif?>
+    </Feature>
+
+  </Package>
+</Wix>
