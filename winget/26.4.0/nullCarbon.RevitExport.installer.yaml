@@ -34,7 +34,8 @@ InstallerSwitches:
 Installers:
   - Architecture: x64
     InstallerUrl: https://github.com/bhupas/revit/releases/download/v26.4.0/nullCarbon-LCA-Export-win64-26.4.0.msi
-    InstallerSha256: 0000000000000000000000000000000000000000000000000000000000000000
+    InstallerSha256: DED13FACB82C61EAB2AD232FABB5AD1BF4317B82F845632BD38B1D60FB34271C
+    ProductCode: '{291887A9-95B7-4031-9810-69B462776076}'
     UpgradeCode: B4F7A2E1-3C8D-4A5F-9E2B-7F1C8D3E5A92
 
 ReleaseDate: 2026-04-13
