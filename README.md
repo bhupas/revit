@@ -1,10 +1,10 @@
-# nullCarbon Revit Export
+# Revit Export
 
 [![Build](https://github.com/bhupas/revit/actions/workflows/build.yml/badge.svg)](https://github.com/bhupas/revit/actions/workflows/build.yml)
 [![Latest release](https://img.shields.io/github/v/release/bhupas/revit?include_prereleases)](https://github.com/bhupas/revit/releases/latest)
 [![License: LGPL-3.0](https://img.shields.io/badge/License-LGPL--3.0-blue.svg)](COPYING.LESSER)
 
-A Revit add-in that exports schedules straight to the **nullCarbon** LCA platform. Adds a single ribbon button to Revit; all other features hidden.
+A Revit add-in that exports schedules straight to the **** LCA platform. Adds a single ribbon button to Revit; all other features hidden.
 
 Built on top of [acnicholas/scaddins](https://github.com/acnicholas/scaddins) (LGPL-3.0). See [NOTICE](NOTICE).
 
@@ -12,11 +12,11 @@ Built on top of [acnicholas/scaddins](https://github.com/acnicholas/scaddins) (L
 
 ## For users — install
 
-1. Download `nullCarbon-LCA-Export-win64-<version>.msi` from the [latest release](https://github.com/bhupas/revit/releases/latest).
-2. Double-click it. **No admin rights needed** — installs per-user under `%LocalAppData%\nullCarbon-LCA-Export\`, no UAC prompt.
+1. Download `-LCA-Export-win64-<version>.msi` from the [latest release](https://github.com/bhupas/revit/releases/latest).
+2. Double-click it. **No admin rights needed** — installs per-user under `%LocalAppData%\-LCA-Export\`, no UAC prompt.
 3. Read and accept the **License Agreement** (LGPL-3.0-or-later).
 4. On the **Custom Setup** page, tick the Revit versions you want to install for (any combination of 2023 / 2024 / 2025 / 2026). Defaults to all bundled versions.
-5. Start Revit. Look for the **nullCarbon** ribbon panel with the **nullCarbon Export** button.
+5. Start Revit. Look for the **** ribbon panel with the ** Export** button.
 
 **One MSI covers every Revit version.** Same `.msi`, no separate per-Revit downloads, same file works for upgrades.
 
@@ -33,7 +33,7 @@ Open the **`do\`** folder. There are exactly four files there, numbered. That's 
 | # | File | What it does |
 |---|---|---|
 | **1** | [`do\1-build.cmd`](do/1-build.cmd) | Builds the add-in for Revit 2023 + 2024 + 2025 + 2026. Output → `src\bin\Release<year>\` |
-| **2** | [`do\2-installer.cmd`](do/2-installer.cmd) | Packages the WiX MSI installer. Run **after** `1-build.cmd`. Output → `setup\out\nullCarbon-LCA-Export-win64-<version>.msi` |
+| **2** | [`do\2-installer.cmd`](do/2-installer.cmd) | Packages the WiX MSI installer. Run **after** `1-build.cmd`. Output → `setup\out\-LCA-Export-win64-<version>.msi` |
 | **3** | [`do\3-release.cmd`](do/3-release.cmd) | Bumps the version, builds, packages, tags, and (with `-Push`) publishes a GitHub Release. **The only command you need for shipping.** |
 | **4** | [`do\4-sync.cmd`](do/4-sync.cmd) | Pulls new commits from upstream SCaddins into a sync branch. Tells you about conflicts if any. |
 
@@ -67,21 +67,21 @@ That rewrites the version in the csproj, builds, packages, and (optionally) tags
 
 | Where the version shows up | How it gets there |
 |---|---|
-| Login window footer ("Build v26.3.2") | [`LoginViewModel.VersionLabel`](src/NullCarbon/Login/LoginViewModel.cs) → `Branding.VersionShort` → assembly |
-| Export window header (small subscript next to logo) | [`ExportSchedulesViewModel.VersionLabel`](src/NullCarbon/ExportSchedules/ViewModels/ExportSchedulesViewModel.cs) → `Branding.VersionShort` → assembly |
-| Ribbon button long-description / tooltip | [`NullCarbonModule.LoadExportButtonData`](src/NullCarbon/NullCarbonModule.cs) → `Branding.ProductWithVersion` → assembly |
-| Installer filename (`nullCarbon-LCA-Export-win64-26.3.2.msi`) | [`scripts\build-installer.ps1`](scripts/build-installer.ps1) reads it from the built DLL |
+| Login window footer ("Build v26.3.2") | [`LoginViewModel.VersionLabel`](src//Login/LoginViewModel.cs) → `Branding.VersionShort` → assembly |
+| Export window header (small subscript next to logo) | [`ExportSchedulesViewModel.VersionLabel`](src//ExportSchedules/ViewModels/ExportSchedulesViewModel.cs) → `Branding.VersionShort` → assembly |
+| Ribbon button long-description / tooltip | [`.LoadExportButtonData`](src//.cs) → `Branding.ProductWithVersion` → assembly |
+| Installer filename (`-LCA-Export-win64-26.3.2.msi`) | [`scripts\build-installer.ps1`](scripts/build-installer.ps1) reads it from the built DLL |
 | Installer Add/Remove Programs entry | WiX is passed `Version` by `build-installer.ps1` (`-d Version=<version>`) |
 | GitHub release tag (`v26.3.2`) | `do\3-release.cmd -Version` creates the tag |
-| Updater "Available: 26.3.2" dialog | [`NullCarbonUpdater`](src/NullCarbon/Update/NullCarbonUpdater.cs) parses the GitHub tag |
+| Updater "Available: 26.3.2" dialog | [``](src//Update/.cs) parses the GitHub tag |
 
-The single source of truth is **`<AssemblyVersion>` in [`src/SCaddins.csproj`](src/SCaddins.csproj)**. All UI surfaces read from the assembly at runtime via [`Branding.VersionShort`](src/NullCarbon/Branding.cs). You should never have to touch the version in more than one place.
+The single source of truth is **`<AssemblyVersion>` in [`src/SCaddins.csproj`](src/SCaddins.csproj)**. All UI surfaces read from the assembly at runtime via [`Branding.VersionShort`](src//Branding.cs). You should never have to touch the version in more than one place.
 
 ---
 
 ## Sync from upstream SCaddins
 
-This fork is structured so `git merge upstream/master` only ever touches a tiny set of files. The export code, the rebrand, and the updater are all isolated under `src/NullCarbon/` and never collide. See [docs/SYNCING.md](docs/SYNCING.md) for the full architecture.
+This fork is structured so `git merge upstream/master` only ever touches a tiny set of files. The export code, the rebrand, and the updater are all isolated under `src//` and never collide. See [docs/SYNCING.md](docs/SYNCING.md) for the full architecture.
 
 The short version:
 
@@ -105,29 +105,29 @@ do/                            <- the four files you double-click
   4-sync.cmd
   README.md                       what each does + first-time install
 
-src/
-  NullCarbon/                 nullCarbon-only code (export, login, API, updater, branding)
+src
+  /                 -only code (export, login, API, updater, branding)
     Branding.cs                 single source of truth for product strings + version
-    NullCarbonModule.cs         ribbon hook called from SCaddins.cs
-    Update/NullCarbonUpdater.cs one-click updater
-    Api/                        nullCarbon API client + DTOs
+    .cs         ribbon hook called from SCaddins.cs
+    Update/.cs one-click updater
+    Api/                         API client + DTOs
     Login/                      login window
     Models/                     shared export-domain types
     ExportSchedules/            the rewritten ExportSchedules implementation
   Assets/
-    nullcarbon-logo.svg         source logo
-    Ribbon/nullcarbon-rvt*.png  ribbon icons
-  SCaddins.cs                 upstream entry point + 2 #if NULLCARBON islands
-  SCaddins.csproj             upstream csproj + 1 nullCarbon edit block + version
+    -logo.svg         source logo
+    Ribbon/-rvt*.png  ribbon icons
+  SCaddins.cs                 upstream entry point + 2 #if  islands
+  SCaddins.csproj             upstream csproj + 1  edit block + version
   SCaddins.addin              rebranded; merge=ours
   Constants.cs                rebranded URLs; merge=ours
   LatestRelease.cs            untouched (GitHub Releases JSON model)
 
 setup/
-  nullcarbon/                 nullCarbon WiX v5 MSI installer
-    nullcarbon-installer.wxs
-    nullcarbon-license.rtf      EULA shown by the installer (LGPL-3.0)
-    nullcarbon.ico
+  /                  WiX v5 MSI installer
+    -installer.wxs
+    -license.rtf      EULA shown by the installer (LGPL-3.0)
+    .ico
 
 scripts/                      PowerShell scripts that the do/*.cmd files wrap
   build.ps1
