@@ -89,7 +89,9 @@ Ok $WixExe
 # and util:XmlFile (which writes the absolute SCaddins.dll path into each
 # .addin at install time) lives in WixToolset.Util.wixext. Both have to be
 # added to wix's per-user extension cache before `wix build` can resolve the
-# ui: and util: namespaces in our .wxs.
+# ui: and util: namespaces in our .wxs. Both are pinned to $WixVersion, both in
+# the cache check and in the -ext references below, so a cache that also holds
+# other versions (e.g. from a WiX 6/7 install) can't change the build.
 $wixExtensions = @('WixToolset.UI.wixext', 'WixToolset.Util.wixext')
 Step "WiX extensions"
 $extList = & $WixExe extension list --global 2>&1
@@ -97,18 +99,18 @@ foreach ($ext in $wixExtensions) {
     $hasExt = $false
     if ($extList) {
         foreach ($line in $extList) {
-            if ($line -match [regex]::Escape($ext)) { $hasExt = $true; break }
+            if ($line -match ('^\s*' + [regex]::Escape($ext) + '\s+' + [regex]::Escape($WixVersion) + '\b')) { $hasExt = $true; break }
         }
     }
     if ($hasExt) {
-        Ok "$ext already installed"
+        Ok "$ext/$WixVersion already installed"
     } else {
         Write-Host "    Installing $ext/$WixVersion"
         & $WixExe extension add --global "$ext/$WixVersion" 2>&1 | ForEach-Object { Write-Host "    $_" }
         if ($LASTEXITCODE -ne 0) {
             Fail "wix extension add $ext/$WixVersion failed (exit $LASTEXITCODE)"
         }
-        Ok "Installed $ext."
+        Ok "Installed $ext/$WixVersion."
     }
 }
 
@@ -212,7 +214,7 @@ $wixArgs = @(
     '-arch', 'x64'
 )
 foreach ($ext in $wixExtensions) {
-    $wixArgs += @('-ext', $ext)
+    $wixArgs += @('-ext', "$ext/$WixVersion")
 }
 $wixArgs += @('-d', "Version=$Version")
 foreach ($y in $builtYears) {
