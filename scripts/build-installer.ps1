@@ -84,27 +84,32 @@ Step "WiX"
 Ok $WixExe
 & $WixExe --version 2>&1 | ForEach-Object { Ok $_ }
 
-# --- Make sure the WiX UI extension is installed ------------------------------
+# --- Make sure the WiX extensions are installed -------------------------------
 # WixUI_FeatureTree (the feature picker dialog) lives in WixToolset.UI.wixext,
-# which has to be added to wix's per-user extension cache before `wix build`
-# can resolve the ui:WixUI namespace in our .wxs.
-Step "WiX UI extension"
+# and util:XmlFile (which writes the absolute SCaddins.dll path into each
+# .addin at install time) lives in WixToolset.Util.wixext. Both have to be
+# added to wix's per-user extension cache before `wix build` can resolve the
+# ui: and util: namespaces in our .wxs.
+$wixExtensions = @('WixToolset.UI.wixext', 'WixToolset.Util.wixext')
+Step "WiX extensions"
 $extList = & $WixExe extension list --global 2>&1
-$hasUiExt = $false
-if ($extList) {
-    foreach ($line in $extList) {
-        if ($line -match 'WixToolset\.UI\.wixext') { $hasUiExt = $true; break }
+foreach ($ext in $wixExtensions) {
+    $hasExt = $false
+    if ($extList) {
+        foreach ($line in $extList) {
+            if ($line -match [regex]::Escape($ext)) { $hasExt = $true; break }
+        }
     }
-}
-if ($hasUiExt) {
-    Ok "WixToolset.UI.wixext already installed"
-} else {
-    Write-Host "    Installing WixToolset.UI.wixext/$WixVersion"
-    & $WixExe extension add --global "WixToolset.UI.wixext/$WixVersion" 2>&1 | ForEach-Object { Write-Host "    $_" }
-    if ($LASTEXITCODE -ne 0) {
-        Fail "wix extension add WixToolset.UI.wixext/$WixVersion failed (exit $LASTEXITCODE)"
+    if ($hasExt) {
+        Ok "$ext already installed"
+    } else {
+        Write-Host "    Installing $ext/$WixVersion"
+        & $WixExe extension add --global "$ext/$WixVersion" 2>&1 | ForEach-Object { Write-Host "    $_" }
+        if ($LASTEXITCODE -ne 0) {
+            Fail "wix extension add $ext/$WixVersion failed (exit $LASTEXITCODE)"
+        }
+        Ok "Installed $ext."
     }
-    Ok "Installed."
 }
 
 # --- Detect built configurations ---------------------------------------------
@@ -200,13 +205,16 @@ New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 $outFile = "$outDir\nullCarbon-LCA-Export-win64-$Version.msi"
 
 # Preprocessor defines. -d Name=Value sets $(var.Name) inside the .wxs file.
-# -ext loads the UI dialog set so ui:WixUI Id="WixUI_FeatureTree" resolves.
+# -ext loads the UI dialog set (ui:WixUI Id="WixUI_FeatureTree") and the util
+# extension (util:XmlFile).
 $wixArgs = @(
     'build',
-    '-arch', 'x64',
-    '-ext', 'WixToolset.UI.wixext',
-    '-d', "Version=$Version"
+    '-arch', 'x64'
 )
+foreach ($ext in $wixExtensions) {
+    $wixArgs += @('-ext', $ext)
+}
+$wixArgs += @('-d', "Version=$Version")
 foreach ($y in $builtYears) {
     $wixArgs += @('-d', "R$y=Enabled")
 }

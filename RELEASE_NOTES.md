@@ -32,6 +32,11 @@ Keep entries **short and user-facing**. The in-app updater dialog truncates to 6
 
 ---
 
+## v26.4.3 -- 2026-09-29
+
+### Fixed
+- **"Add-in Assembly Not Found" when Revit starts.** The add-in manifest pointed to `SCaddins.dll` with a relative path that only works when `AppData\Roaming` and `AppData\Local` sit in the same user profile folder. On PCs where IT redirects AppData to a server or another drive, or where the install folder was changed during setup, Revit could not find the DLL. The installer now writes the full path to `SCaddins.dll` into the manifest. If Revit already shows this error, install this version manually: `winget upgrade nullCarbon.RevitExport`, or download the .msi below.
+
 ## v26.4.2 -- 2026-04-13
 
 ### Fixed

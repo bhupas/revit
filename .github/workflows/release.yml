@@ -44,7 +44,7 @@ jobs:
         shell: pwsh
         run: scripts\build.ps1 -Clean
 
-      - name: Install WiX v5 + UI extension
+      - name: Install WiX v5 + UI and Util extensions
         shell: pwsh
         run: |
           # Pin to v5 -- v7 introduced a paid OSMF EULA that has to be
@@ -56,6 +56,9 @@ jobs:
           # the UI extension. wix build needs -ext WixToolset.UI.wixext, and
           # the extension itself has to be added to the per-user cache first.
           wix extension add --global WixToolset.UI.wixext/5.0.2
+          # util:XmlFile (writes the absolute SCaddins.dll path into each
+          # .addin at install time) lives in the Util extension.
+          wix extension add --global WixToolset.Util.wixext/5.0.2
 
       - name: Package installer (MSI)
         shell: pwsh

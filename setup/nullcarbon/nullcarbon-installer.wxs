@@ -29,6 +29,13 @@
     %AppData%\Autodesk\Revit\Addins\2025\nullCarbon-LCA-Export.addin
     %AppData%\Autodesk\Revit\Addins\2026\nullCarbon-LCA-Export.addin
 
+  The <Assembly> path inside each .addin is rewritten at install time
+  (util:XmlFile) to the absolute path of that year's SCaddins.dll. The
+  relative path in src\SCaddins.addin only works when %AppData% and
+  %LocalAppData% are siblings under the same AppData folder, which is not
+  the case with folder redirection, a moved profile, or a custom install
+  folder; Revit then fails with "Add-in Assembly Not Found".
+
   Per-Revit-year content is gated by WiX preprocessor defines passed in by
   scripts\build-installer.ps1 with -d R2023=Enabled etc. The DLL payload is
   pre-staged by build-installer.ps1 into setup\out\stage\<year>\ with the
@@ -41,6 +48,7 @@
 
   Required wix extensions:
       WixToolset.UI.wixext   (for WixUI_FeatureTree dialog set)
+      WixToolset.Util.wixext (for util:XmlFile, the .addin path rewrite)
 -->
 
 <?ifndef Version  ?><?define Version  = "0.0.0"  ?><?endif?>
@@ -51,7 +59,8 @@
 <?ifndef StageDir ?><?define StageDir = "..\out\stage" ?><?endif?>
 
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
-     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
 
   <Package
       Name="nullCarbon Revit Export"
@@ -127,6 +136,10 @@
       </Component>
     </ComponentGroup>
 
+    <!-- Each Addin component points its .addin's <Assembly> at the absolute
+         path of that year's SCaddins.dll (see header). PreserveModifiedDate
+         keeps the file looking unmodified to Windows Installer, so a later
+         upgrade still replaces it instead of skipping it as user data. -->
     <?if $(var.R2023) = "Enabled" ?>
     <ComponentGroup Id="Revit2023AppGroup" Directory="InstallFolder2023">
       <Files Include="$(var.StageDir)\2023\app\**" />
@@ -136,6 +149,15 @@
         <File Id="Addin2023File"
               Source="$(var.StageDir)\2023\addin\nullCarbon-LCA-Export.addin"
               KeyPath="yes" />
+        <util:XmlFile Id="Addin2023AssemblyPath"
+                      File="[#Addin2023File]"
+                      Action="setValue"
+                      ElementPath="/RevitAddIns/AddIn/Assembly"
+                      Value="[InstallFolder2023]SCaddins.dll"
+                      SelectionLanguage="XPath"
+                      PreserveModifiedDate="yes"
+                      Permanent="yes"
+                      Sequence="1" />
       </Component>
     </ComponentGroup>
     <?endif?>
@@ -149,6 +171,15 @@
         <File Id="Addin2024File"
               Source="$(var.StageDir)\2024\addin\nullCarbon-LCA-Export.addin"
               KeyPath="yes" />
+        <util:XmlFile Id="Addin2024AssemblyPath"
+                      File="[#Addin2024File]"
+                      Action="setValue"
+                      ElementPath="/RevitAddIns/AddIn/Assembly"
+                      Value="[InstallFolder2024]SCaddins.dll"
+                      SelectionLanguage="XPath"
+                      PreserveModifiedDate="yes"
+                      Permanent="yes"
+                      Sequence="1" />
       </Component>
     </ComponentGroup>
     <?endif?>
@@ -162,6 +193,15 @@
         <File Id="Addin2025File"
               Source="$(var.StageDir)\2025\addin\nullCarbon-LCA-Export.addin"
               KeyPath="yes" />
+        <util:XmlFile Id="Addin2025AssemblyPath"
+                      File="[#Addin2025File]"
+                      Action="setValue"
+                      ElementPath="/RevitAddIns/AddIn/Assembly"
+                      Value="[InstallFolder2025]SCaddins.dll"
+                      SelectionLanguage="XPath"
+                      PreserveModifiedDate="yes"
+                      Permanent="yes"
+                      Sequence="1" />
       </Component>
     </ComponentGroup>
     <?endif?>
@@ -175,6 +215,15 @@
         <File Id="Addin2026File"
               Source="$(var.StageDir)\2026\addin\nullCarbon-LCA-Export.addin"
               KeyPath="yes" />
+        <util:XmlFile Id="Addin2026AssemblyPath"
+                      File="[#Addin2026File]"
+                      Action="setValue"
+                      ElementPath="/RevitAddIns/AddIn/Assembly"
+                      Value="[InstallFolder2026]SCaddins.dll"
+                      SelectionLanguage="XPath"
+                      PreserveModifiedDate="yes"
+                      Permanent="yes"
+                      Sequence="1" />
       </Component>
     </ComponentGroup>
     <?endif?>
