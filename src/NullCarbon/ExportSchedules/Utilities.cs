@@ -82,6 +82,7 @@
 
             StringBuilder exportMsg = new StringBuilder();
             int successes = 0;
+            int skipped = 0;
             int attempts = 0;
 
             // Create a new ExcelPackage for the final merged Excel file.
@@ -106,6 +107,15 @@
                             string csvFilePath = Path.Combine(exportPath, schedule.ExportName);
                             try
                             {
+                                // A schedule without visible columns has nothing the backend can read.
+                                var headings = GetVisibleColumnHeadings(schedule.RevitViewSchedule);
+                                if (headings.Count == 0)
+                                {
+                                    exportMsg.AppendLine($"[Skipped] {schedule.ExportName}: the schedule has no visible columns.");
+                                    skipped++;
+                                    continue;
+                                }
+
                                 // Use the name (minus extension) as the worksheet name.
                                 string requestedSheetName = Path.GetFileNameWithoutExtension(schedule.ExportName);
                                 string sheetName = GetUniqueWorksheetName(mergedPackage, requestedSheetName);
@@ -152,9 +162,19 @@
 
                                 // Read the CSV file and manually parse it to avoid any automatic conversion
                                 string csvContent = File.ReadAllText(csvFilePath, Encoding.UTF8);
+                                var rows = ParseCsvRows(csvContent, delimiterChar, textQualifierChar);
 
-                                // MANUAL CSV PARSING - bypasses all EPPlus automatic formatting
-                                LoadCsvAsTextManually(worksheet, csvContent, delimiterChar, textQualifierChar);
+                                // Guarantee the title + headings rows the backend expects (header=[1]).
+                                var definition = schedule.RevitViewSchedule.Definition;
+                                rows = ScheduleSheetLayout.Normalize(
+                                    rows,
+                                    schedule.RevitName,
+                                    headings,
+                                    titleExported: options.Title && definition.ShowTitle,
+                                    headingsExported: options.ColumnHeaders != ExportColumnHeaders.None && definition.ShowHeaders);
+
+                                // MANUAL CSV WRITING - bypasses all EPPlus automatic formatting
+                                WriteRowsAsText(worksheet, rows);
 
                                 exportMsg.AppendLine($"[Success] {schedule.ExportName}");
                                 successes++;
@@ -188,12 +208,13 @@
                 mergedPackage.SaveAs(new FileInfo(mergedExcelFilePath));
             }
 
-            int fails = attempts - successes;
+            int fails = attempts - successes - skipped;
             string summaryString = string.Format(
                 "Export Summary:" + Environment.NewLine +
-                "{0} Export(s) attempted with {1} success(es) and {2} fail(s)" + Environment.NewLine + Environment.NewLine,
+                "{0} Export(s) attempted with {1} success(es), {2} skipped and {3} fail(s)" + Environment.NewLine + Environment.NewLine,
                 attempts,
                 successes,
+                skipped,
                 fails);
             exportMsg.Insert(0, summaryString);
 
@@ -209,23 +230,47 @@
         }
 
         /// <summary>
-        /// MANUAL CSV LOADING: Bypasses all EPPlus automatic formatting to preserve exact text
+        /// Splits Revit's exported schedule text into rows of fields. A blank line becomes an
+        /// empty row so it keeps its position in the worksheet.
+        /// </summary>
+        private static List<List<string>> ParseCsvRows(string csvContent, char delimiter, char textQualifier)
+        {
+            return csvContent
+                .Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None)
+                .Select(line => string.IsNullOrEmpty(line) ? new List<string>() : ParseCsvLine(line, delimiter, textQualifier))
+                .ToList();
+        }
+
+        /// <summary>
+        /// The schedule's visible column headings, in column order.
+        /// </summary>
+        private static List<string> GetVisibleColumnHeadings(ViewSchedule viewSchedule)
+        {
+            var definition = viewSchedule.Definition;
+            var headings = new List<string>();
+            for (int index = 0; index < definition.GetFieldCount(); index++)
+            {
+                var field = definition.GetField(index);
+                if (!field.IsHidden)
+                {
+                    headings.Add(field.ColumnHeading);
+                }
+            }
+
+            return headings;
+        }
+
+        /// <summary>
+        /// MANUAL CSV WRITING: Bypasses all EPPlus automatic formatting to preserve exact text
         /// This ensures 223.001 displays exactly as 223.001 (never 223,001)
         /// </summary>
         /// <param name="worksheet">The Excel worksheet to populate</param>
-        /// <param name="csvContent">The raw CSV content as string</param>
-        /// <param name="delimiter">Field delimiter character</param>
-        /// <param name="textQualifier">Text qualifier character</param>
-        private static void LoadCsvAsTextManually(ExcelWorksheet worksheet, string csvContent, char delimiter, char textQualifier)
+        /// <param name="rows">Rows of field values; an empty row is left blank</param>
+        private static void WriteRowsAsText(ExcelWorksheet worksheet, List<List<string>> rows)
         {
-            var lines = csvContent.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
-
-            for (int lineIndex = 0; lineIndex < lines.Length; lineIndex++)
+            for (int lineIndex = 0; lineIndex < rows.Count; lineIndex++)
             {
-                string line = lines[lineIndex];
-                if (string.IsNullOrEmpty(line)) continue;
-
-                var fields = ParseCsvLine(line, delimiter, textQualifier);
+                var fields = rows[lineIndex];
 
                 for (int fieldIndex = 0; fieldIndex < fields.Count; fieldIndex++)
                 {
