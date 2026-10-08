@@ -37,6 +37,9 @@ Keep entries **short and user-facing**. The in-app updater dialog truncates to 6
 ### Added
 - **Revit 2027 support.** The nullCarbon Export ribbon now installs for Autodesk Revit 2027 as well as 2023 to 2026. Updating from an earlier version adds Revit 2027 automatically, so there is no need to reinstall.
 
+### Fixed
+- **Upload failed with "only 1 lines in file" for some schedules.** Empty schedules, or schedules exported without a title or column headers, are now always sent with the title and column-heading rows nullCarbon expects.
+
 ## v26.4.3 -- 2026-09-29
 
 ### Fixed
