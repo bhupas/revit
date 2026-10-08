@@ -22,7 +22,7 @@ The first two commands make sure your local `master` matches what's on GitHub (s
 2. Prompts you for the new version (validates `MAJOR.MINOR.PATCH`).
 3. Checks `RELEASE_NOTES.md` for a matching `## v<version>` section -- if missing, opens Notepad so you can add one.
 4. Bumps the version in `src\SCaddins.csproj`.
-5. Builds Release2023 + Release2024 + Release2025 + Release2026.
+5. Builds Release2023 + Release2024 + Release2025 + Release2026 + Release2027.
 6. Packages the WiX MSI installer.
 7. Creates a `vX.Y.Z` git tag and pushes it.
 8. The tag push triggers [`.github/workflows/release.yml`](../.github/workflows/release.yml) which builds on a clean runner and publishes a GitHub Release with the installer attached AND the release notes from `RELEASE_NOTES.md`.
@@ -76,7 +76,7 @@ This single WiX v5 MSI (built from [`setup/nullcarbon/nullcarbon-installer.wxs`]
 - [`scripts/build-installer.ps1`](../scripts/build-installer.ps1) auto-detects which `src\bin\Release<year>\` folders exist and passes the matching `-d R<year>=Enabled` defines to `wix build`.
 - The MSI is **per-user** (`<Package Scope="perUser">`) — no UAC, no admin.
 - The interactive UI is `WixUI_FeatureTree` (from `WixToolset.UI.wixext`), which is **Welcome → License → Custom Setup → Verify → Progress → Finish**. The license text shown is [`setup/nullcarbon/nullcarbon-license.rtf`](../setup/nullcarbon/nullcarbon-license.rtf) (LGPL-3.0-or-later, with nullCarbon and SCaddins copyrights).
-- Each Revit year (2023/2024/2025/2026) is its own MSI Feature, so users get checkboxes on the Custom Setup page. Default state: all bundled years installed.
+- Each Revit year (2023/2024/2025/2026/2027) is its own MSI Feature, so users get checkboxes on the Custom Setup page. Default state: all bundled years installed.
 
 It:
 
@@ -143,6 +143,7 @@ You only need this for paths A and B.
 | Tool | Why | Get it |
 |---|---|---|
 | .NET SDK 8.x (Windows Desktop) | Builds Release2025 / Release2026 + hosts WiX | https://dot.net |
+| .NET SDK 10.x (Windows Desktop) | Builds Release2027 (Revit 2027 runs on .NET 10) | https://dot.net |
 | .NET Framework 4.8 dev pack | Builds Release2023 / Release2024 (both target `net48`) | https://dotnet.microsoft.com/download/dotnet-framework/net48 (scroll to "Developer Pack") |
 | WiX v5 | Packages the MSI | `dotnet tool install --global wix` |
 

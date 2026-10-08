@@ -35,10 +35,13 @@ jobs:
           "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           Write-Host "Version: $v"
 
-      - name: Setup .NET 8
+      # Revit 2027 runs on .NET 10, so Release2027 needs the .NET 10 SDK.
+      - name: Setup .NET 8 + 10
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: |
+            8.0.x
+            10.0.x
 
       - name: Build all configs
         shell: pwsh

@@ -611,7 +611,7 @@
 
         private static long GetElementIdValue(ElementId elementId)
         {
-#if REVIT2024 || REVIT2025 || REVIT2026
+#if REVIT2024 || REVIT2025 || REVIT2026 || REVIT2027
             return elementId != null
                 ? elementId.Value
                 : ElementId.InvalidElementId.Value;

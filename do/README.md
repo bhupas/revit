@@ -5,7 +5,7 @@ Five files in this folder. **Numbered in the order you'll typically use them.** 
 | # | File | What it does | When to click |
 |---|---|---|---|
 | **0** | **`0-install-prerequisites.cmd`** | Auto-installs .NET SDK 8 + .NET 4.8 Dev Pack + WiX v5 + GitHub CLI via winget / dotnet tool. Idempotent — skips anything already installed. | **First time on a fresh machine**, then never again. |
-| **1** | **`1-build.cmd`** | Build the add-in for Revit 2023 + 2024 + 2025 + 2026 | After making code changes |
+| **1** | **`1-build.cmd`** | Build the add-in for Revit 2023 + 2024 + 2025 + 2026 + 2027 | After making code changes |
 | **2** | **`2-installer.cmd`** | Package the `.msi` installer | After `1-build.cmd`, when you want to test the installer locally |
 | **3** | **`3-release.cmd`** | **Interactive release wizard.** Prompts for version + push y/n + confirms, then does build + installer + tag + (push). | When you want to **ship a new version**. Replaces 1+2 — does it all. |
 | **4** | **`4-sync.cmd`** | **Interactive sync wizard.** Defaults to a safe dry-run preview; asks for explicit confirmation before doing a real merge. | Periodically. Or just let the weekly GitHub Action do it for you. |
@@ -72,7 +72,7 @@ git checkout master && git pull && do\3-release.cmd
 5. Asks whether to push the tag to GitHub (default: no).
 6. Shows a summary and waits for `yes` to proceed.
 7. Bumps the version in `src\SCaddins.csproj`.
-8. Builds Release2023 + Release2024 + Release2025 + Release2026.
+8. Builds Release2023 + Release2024 + Release2025 + Release2026 + Release2027.
 9. Packages the WiX MSI installer.
 10. Creates a `vX.Y.Z` git tag.
 11. If you said yes to push: pushes the tag, which triggers `.github\workflows\release.yml` to publish a GitHub Release with the installer attached AND the release notes from RELEASE_NOTES.md.

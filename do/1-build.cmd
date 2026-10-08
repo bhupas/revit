@@ -2,7 +2,7 @@
 REM ======================================================================
 REM  1 - BUILD
 REM
-REM  Builds the add-in for Revit 2023 + 2024 + 2025 + 2026.
+REM  Builds the add-in for Revit 2023 + 2024 + 2025 + 2026 + 2027.
 REM  Output: src\bin\Release<year>\
 REM
 REM  Click this first when you've changed code.

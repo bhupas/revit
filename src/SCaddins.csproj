@@ -11,7 +11,7 @@
 	<ImplicitUsings>disable</ImplicitUsings>
 	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-	<Configurations>Debug;Release2026;Release2025;Release2024;Release2023;Release2022;Release2021;Release2020</Configurations>
+	<Configurations>Debug;Release2027;Release2026;Release2025;Release2024;Release2023;Release2022;Release2021;Release2020</Configurations>
 	<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
 	<Authors>Andrew Nicholas</Authors>
 	<Title>SCaddins</Title>
@@ -40,6 +40,16 @@
 	   <TargetFramework>net8.0-windows</TargetFramework>
      </PropertyGroup>
 	 
+	 <!-- Revit 2027 moved to .NET 10, so this config needs the .NET 10 SDK. -->
+	 <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2027|AnyCPU'">
+	   <DefineConstants>$(DefineConstants);REVIT2027</DefineConstants>
+       <WarningLevel>4</WarningLevel>
+	   <Optimize>True</Optimize>
+	   <TargetFramework>net10.0-windows</TargetFramework>
+       <IsPublishable>False</IsPublishable>
+       <Deterministic>False</Deterministic>
+     </PropertyGroup>
+
 	 <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release2026|AnyCPU'">
 	   <DefineConstants>$(DefineConstants);REVIT2026</DefineConstants>
        <WarningLevel>4</WarningLevel>
@@ -201,6 +211,7 @@
     <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="2024.0.0" allowedVersions="[2024.0.0,2024.0.0)" TargetFramework="net48" Condition="$(Configuration.Contains('2024'))" />
 	<PackageReference Include="Revit_All_Main_Versions_API_x64" Version="2025.0.0" allowedVersions="[2025.0.0,2026.0.0)" TargetFramework="net8.0-windows" Condition="$(Configuration.Contains('2025'))" />
 	<PackageReference Include="Revit_All_Main_Versions_API_x64" Version="2026.0.0" allowedVersions="[2026.0.0,2027.0.0)" TargetFramework="net8.0-windows" Condition="$(Configuration.Contains('2026'))" />
+	<PackageReference Include="Revit_All_Main_Versions_API_x64" Version="2027.0.0" allowedVersions="[2027.0.0,2028.0.0)" TargetFramework="net10.0-windows" Condition="$(Configuration.Contains('2027'))" />
 	<PackageReference Include="Revit_All_Main_Versions_API_x64" Version="2026.0.0" allowedVersions="[2026.0.0,2027.0.0)" TargetFramework="net8.0-windows" Condition="$(Configuration.Contains('Debug'))" />
 	<PackageReference Include="WPF-UI" Version="3.0.5" />
  </ItemGroup>
@@ -487,6 +498,16 @@
   <ItemGroup Condition="$(Configuration.Contains('2024'))">
     <PackageReference Remove="Revit_All_Main_Versions_API_x64" />
     <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="2024.*" />
+  </ItemGroup>
+
+  <!-- nullCarbon fork: Revit 2027 runs on .NET 10, which ships these assemblies
+       itself (NuGet warns NU1510). Don't reference the older package versions
+       there, so no stale copies land next to the 2027 SCaddins.dll. -->
+  <ItemGroup Condition="$(Configuration.Contains('2027'))">
+    <PackageReference Remove="System.Configuration.ConfigurationManager" />
+    <PackageReference Remove="System.Drawing.Common" />
+    <PackageReference Remove="System.Formats.Asn1" />
+    <PackageReference Remove="System.Text.Json" />
   </ItemGroup>
 
   <!-- nullCarbon fork: override upstream's PostBuild target. Upstream's version

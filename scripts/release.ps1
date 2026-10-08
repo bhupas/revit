@@ -2,7 +2,7 @@
 #
 # What this does:
 #   1. Bumps the version in src\SCaddins.csproj (AssemblyVersion + friends)
-#   2. Builds Release2024, Release2025, Release2026
+#   2. Builds Release2023, Release2024, Release2025, Release2026, Release2027
 #   3. Packages the WiX MSI installer
 #   4. Creates a git tag (vX.Y.Z) and an annotated commit
 #   5. (Optional) Pushes the tag -- triggers .github\workflows\release.yml

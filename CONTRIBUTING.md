@@ -43,7 +43,7 @@ The repo owner has applied these rules on GitHub. They formalize the "only owner
 |---|---|
 | Restrict who can push to matching branches | Repo admins (owner) only |
 | Require a pull request before merging | optional (the owner can push directly for releases) |
-| Require status checks to pass before merging | `Build / Build Release2023`, `Build / Build Release2024`, `Build / Build Release2025`, `Build / Build Release2026` |
+| Require status checks to pass before merging | `Build / Build Release2023`, `Build / Build Release2024`, `Build / Build Release2025`, `Build / Build Release2026`, `Build / Build Release2027` |
 | Require branches to be up to date before merging | yes |
 | Require linear history | yes |
 | Allow force pushes | NO |
@@ -54,7 +54,7 @@ The repo owner has applied these rules on GitHub. They formalize the "only owner
 | Setting | Value |
 |---|---|
 | Restrict who can push to matching branches | Repo admins (owner) only |
-| Require status checks to pass before merging | `Build / Build Release2023`, `Build / Build Release2024`, `Build / Build Release2025`, `Build / Build Release2026` |
+| Require status checks to pass before merging | `Build / Build Release2023`, `Build / Build Release2024`, `Build / Build Release2025`, `Build / Build Release2026`, `Build / Build Release2027` |
 | Allow force pushes | NO |
 | Allow deletions | NO |
 

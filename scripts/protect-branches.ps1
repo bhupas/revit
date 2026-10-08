@@ -77,7 +77,8 @@ $statusChecks = @{
         'Build Release2023',
         'Build Release2024',
         'Build Release2025',
-        'Build Release2026'
+        'Build Release2026',
+        'Build Release2027'
     )
 }
 

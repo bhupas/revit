@@ -2,6 +2,7 @@
 #
 # Installs the things you need to build the add-in and package the MSI:
 #   - .NET SDK 8.x
+#   - .NET SDK 10.x (Revit 2027 runs on .NET 10)
 #   - .NET Framework 4.8 Developer Pack
 #   - WiX v5 (installed as a dotnet global tool)
 #   - GitHub CLI (for branch protection / release scripts)
@@ -75,6 +76,19 @@ Install-IfMissing `
         $sdks = & dotnet --list-sdks 2>$null
         if (-not $sdks) { return $false }
         return ($sdks | Where-Object { $_ -match '^8\.' }) -ne $null
+    }
+
+# --- 1b) .NET SDK 10 (Release2027 / Revit 2027) -----------------------------
+Install-IfMissing `
+    -DisplayName ".NET SDK 10" `
+    -WingetId "Microsoft.DotNet.SDK.10" `
+    -ManualUrl "https://dotnet.microsoft.com/download/dotnet/10.0" `
+    -AlreadyInstalledTest {
+        $dotnet = Get-Command dotnet -ErrorAction SilentlyContinue
+        if (-not $dotnet) { return $false }
+        $sdks = & dotnet --list-sdks 2>$null
+        if (-not $sdks) { return $false }
+        return ($sdks | Where-Object { $_ -match '^10\.' }) -ne $null
     }
 
 # --- 2) .NET Framework 4.8 Developer Pack ------------------------------------
