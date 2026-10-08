@@ -5,18 +5,19 @@
 # scripts\build-installer.ps1 can package an Inno Setup .exe.
 #
 # Usage:
-#     scripts\build.ps1                            # Release2023 + 2024 + 2025 + 2026
+#     scripts\build.ps1                            # Release2023 + 2024 + 2025 + 2026 + 2027
 #     scripts\build.ps1 -Configurations Release2025
 #     scripts\build.ps1 -Clean                     # full clean rebuild
 #     scripts\build.ps1 -SkipRestore               # faster repeat builds
 #
 # Requirements (script will tell you the install commands if missing):
-#   - .NET SDK 8.x with Windows Desktop workload  (for Release2025 / Release2026)
+#   - .NET SDK 10.x                                (for Release2027; also builds 2025 / 2026)
+#   - .NET SDK 8.x or newer                        (for Release2025 / Release2026)
 #   - .NET Framework 4.8 developer pack            (for Release2023 / Release2024)
 
 [CmdletBinding()]
 param(
-    [string[]]$Configurations = @('Release2023','Release2024','Release2025','Release2026'),
+    [string[]]$Configurations = @('Release2023','Release2024','Release2025','Release2026','Release2027'),
     [switch]$Clean,
     [switch]$SkipRestore
 )
@@ -74,12 +75,32 @@ then double-click do\1-build.cmd again.
 }
 $sdks | ForEach-Object { Ok $_ }
 
-$has8 = $sdks | Where-Object { $_ -match '^8\.' }
-if (-not $has8) {
-    Warn ".NET SDK 8.x was not found in the list above."
+$sdkMajors  = @($sdks | ForEach-Object { if ($_ -match '^(\d+)\.') { [int]$Matches[1] } })
+$has8OrNewer = @($sdkMajors | Where-Object { $_ -ge 8 }).Count -gt 0
+$has10       = @($sdkMajors | Where-Object { $_ -ge 10 }).Count -gt 0
+if (-not $has8OrNewer) {
+    Warn ".NET SDK 8.x or newer was not found in the list above."
     Warn "Release2025 and Release2026 may fail to build."
     Warn "Install SDK 8 with:"
     Warn "    winget install --id Microsoft.DotNet.SDK.8"
+}
+
+# Revit 2027 runs on .NET 10, so Release2027 targets net10.0-windows. Fail
+# rather than skip: a silently skipped Release2027 would ship an installer
+# without Revit 2027 support.
+if (($Configurations -contains 'Release2027') -and -not $has10) {
+    Fail @"
+Release2027 (Revit 2027) needs the .NET SDK 10, which was not found above.
+
+Install it with:
+
+    winget install --id Microsoft.DotNet.SDK.10 --silent --accept-package-agreements --accept-source-agreements
+
+then CLOSE this terminal, open a NEW one, and run the build again.
+To build only the older Revit versions for now:
+
+    scripts\build.ps1 -Configurations Release2023,Release2024,Release2025,Release2026
+"@
 }
 
 # --- Preflight: .NET Framework 4.8 dev pack (for Release2023 / Release2024) --

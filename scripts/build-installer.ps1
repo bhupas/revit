@@ -115,7 +115,7 @@ foreach ($ext in $wixExtensions) {
 }
 
 # --- Detect built configurations ---------------------------------------------
-$years = @('2023','2024','2025','2026')
+$years = @('2023','2024','2025','2026','2027')
 $builtYears = @()
 foreach ($y in $years) {
     if (Test-Path "$RepoRoot\src\bin\Release$y\SCaddins.dll") { $builtYears += $y }
@@ -128,7 +128,7 @@ $builtYears | ForEach-Object { Ok "Release$_" }
 
 # --- Resolve version ----------------------------------------------------------
 if (-not $Version) {
-    foreach ($y in @('2025','2026','2024','2023')) {
+    foreach ($y in @('2025','2026','2027','2024','2023')) {
         $dll = "$RepoRoot\src\bin\Release$y\SCaddins.dll"
         if (Test-Path $dll) {
             $info = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($dll)

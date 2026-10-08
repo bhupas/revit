@@ -15,7 +15,7 @@ Built on top of [acnicholas/scaddins](https://github.com/acnicholas/scaddins) (L
 1. Download `-LCA-Export-win64-<version>.msi` from the [latest release](https://github.com/bhupas/revit/releases/latest).
 2. Double-click it. **No admin rights needed** — installs per-user under `%LocalAppData%\-LCA-Export\`, no UAC prompt.
 3. Read and accept the **License Agreement** (LGPL-3.0-or-later).
-4. On the **Custom Setup** page, tick the Revit versions you want to install for (any combination of 2023 / 2024 / 2025 / 2026). Defaults to all bundled versions.
+4. On the **Custom Setup** page, tick the Revit versions you want to install for (any combination of 2023 / 2024 / 2025 / 2026 / 2027). Defaults to all bundled versions.
 5. Start Revit. Look for the **** ribbon panel with the ** Export** button.
 
 **One MSI covers every Revit version.** Same `.msi`, no separate per-Revit downloads, same file works for upgrades.
@@ -32,7 +32,7 @@ Open the **`do\`** folder. There are exactly four files there, numbered. That's 
 
 | # | File | What it does |
 |---|---|---|
-| **1** | [`do\1-build.cmd`](do/1-build.cmd) | Builds the add-in for Revit 2023 + 2024 + 2025 + 2026. Output → `src\bin\Release<year>\` |
+| **1** | [`do\1-build.cmd`](do/1-build.cmd) | Builds the add-in for Revit 2023 + 2024 + 2025 + 2026 + 2027. Output → `src\bin\Release<year>\` |
 | **2** | [`do\2-installer.cmd`](do/2-installer.cmd) | Packages the WiX MSI installer. Run **after** `1-build.cmd`. Output → `setup\out\-LCA-Export-win64-<version>.msi` |
 | **3** | [`do\3-release.cmd`](do/3-release.cmd) | Bumps the version, builds, packages, tags, and (with `-Push`) publishes a GitHub Release. **The only command you need for shipping.** |
 | **4** | [`do\4-sync.cmd`](do/4-sync.cmd) | Pulls new commits from upstream SCaddins into a sync branch. Tells you about conflicts if any. |
@@ -45,6 +45,7 @@ See [`do\README.md`](do/README.md) for examples and the first-time install comma
 
 ```cmd
 winget install --id Microsoft.DotNet.SDK.8 --silent --accept-package-agreements --accept-source-agreements
+winget install --id Microsoft.DotNet.SDK.10 --silent --accept-package-agreements --accept-source-agreements
 winget install --id Microsoft.DotNet.Framework.DeveloperPack_4 --silent --accept-package-agreements --accept-source-agreements
 dotnet tool install --global wix
 ```

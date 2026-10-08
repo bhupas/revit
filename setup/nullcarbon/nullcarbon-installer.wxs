@@ -14,8 +14,10 @@
 
   2. Silent (auto-updater runs `msiexec /i <file> /qn /norestart`):
         No UI. MajorUpgrade preserves the feature selection from the
-        previous install so subsequent silent upgrades only touch the
-        Revit versions the user originally picked.
+        previous install, so Revit versions the user turned off stay off.
+        A Revit year that is new in this MSI (e.g. 2027) has no previous
+        state to migrate, so it installs by default (Level="1"): existing
+        users get it added by the auto-updater without reinstalling.
 
   Layout:
     %LocalAppData%\nullCarbon-LCA-Export\          (main install)
@@ -24,10 +26,12 @@
         2024\  *.dll  [+ Monaco\**]
         2025\  *.dll  [+ Monaco\**]
         2026\  *.dll  [+ Monaco\**]
+        2027\  *.dll  [+ Monaco\**]
     %AppData%\Autodesk\Revit\Addins\2023\nullCarbon-LCA-Export.addin
     %AppData%\Autodesk\Revit\Addins\2024\nullCarbon-LCA-Export.addin
     %AppData%\Autodesk\Revit\Addins\2025\nullCarbon-LCA-Export.addin
     %AppData%\Autodesk\Revit\Addins\2026\nullCarbon-LCA-Export.addin
+    %AppData%\Autodesk\Revit\Addins\2027\nullCarbon-LCA-Export.addin
 
   The <Assembly> path inside each .addin is rewritten at install time
   (util:XmlFile) to the absolute path of that year's SCaddins.dll. The
@@ -56,6 +60,7 @@
 <?ifndef R2024    ?><?define R2024    = "Disabled" ?><?endif?>
 <?ifndef R2025    ?><?define R2025    = "Disabled" ?><?endif?>
 <?ifndef R2026    ?><?define R2026    = "Disabled" ?><?endif?>
+<?ifndef R2027    ?><?define R2027    = "Disabled" ?><?endif?>
 <?ifndef StageDir ?><?define StageDir = "..\out\stage" ?><?endif?>
 
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
@@ -109,6 +114,7 @@
         <Directory Id="InstallFolder2024" Name="2024" />
         <Directory Id="InstallFolder2025" Name="2025" />
         <Directory Id="InstallFolder2026" Name="2026" />
+        <Directory Id="InstallFolder2027" Name="2027" />
       </Directory>
     </StandardDirectory>
 
@@ -120,6 +126,7 @@
             <Directory Id="RevitAddins2024" Name="2024" />
             <Directory Id="RevitAddins2025" Name="2025" />
             <Directory Id="RevitAddins2026" Name="2026" />
+            <Directory Id="RevitAddins2027" Name="2027" />
           </Directory>
         </Directory>
       </Directory>
@@ -228,6 +235,28 @@
     </ComponentGroup>
     <?endif?>
 
+    <?if $(var.R2027) = "Enabled" ?>
+    <ComponentGroup Id="Revit2027AppGroup" Directory="InstallFolder2027">
+      <Files Include="$(var.StageDir)\2027\app\**" />
+    </ComponentGroup>
+    <ComponentGroup Id="Revit2027AddinGroup" Directory="RevitAddins2027">
+      <Component Id="Addin2027" Guid="*">
+        <File Id="Addin2027File"
+              Source="$(var.StageDir)\2027\addin\nullCarbon-LCA-Export.addin"
+              KeyPath="yes" />
+        <util:XmlFile Id="Addin2027AssemblyPath"
+                      File="[#Addin2027File]"
+                      Action="setValue"
+                      ElementPath="/RevitAddIns/AddIn/Assembly"
+                      Value="[InstallFolder2027]SCaddins.dll"
+                      SelectionLanguage="XPath"
+                      PreserveModifiedDate="yes"
+                      Permanent="yes"
+                      Sequence="1" />
+      </Component>
+    </ComponentGroup>
+    <?endif?>
+
     <!-- ============================================================== -->
     <!-- Feature tree (drives the Custom Setup dialog)                    -->
     <!-- ============================================================== -->
@@ -283,6 +312,17 @@
                AllowAdvertise="no">
         <ComponentGroupRef Id="Revit2026AppGroup" />
         <ComponentGroupRef Id="Revit2026AddinGroup" />
+      </Feature>
+      <?endif?>
+
+      <?if $(var.R2027) = "Enabled" ?>
+      <Feature Id="Revit2027Feature"
+               Title="Revit 2027"
+               Description="Install the nullCarbon Export ribbon for Autodesk Revit 2027."
+               Level="1"
+               AllowAdvertise="no">
+        <ComponentGroupRef Id="Revit2027AppGroup" />
+        <ComponentGroupRef Id="Revit2027AddinGroup" />
       </Feature>
       <?endif?>
     </Feature>

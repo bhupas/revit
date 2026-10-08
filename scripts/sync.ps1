@@ -1,7 +1,7 @@
 # nullCarbon Revit Export -- upstream sync helper.
 #
 # Fetches acnicholas/scaddins, attempts a merge into a sync branch, and
-# (if .NET SDK is available) builds Release2023/2024/2025/2026 to confirm nothing
+# (if .NET SDK is available) builds Release2023/2024/2025/2026/2027 to confirm nothing
 # broke. See docs\SYNCING.md for the full workflow this script implements.
 #
 # Usage:
@@ -127,7 +127,7 @@ if (-not $SkipBuild) {
         }
     } else {
         Warn "dotnet CLI not found -- skipping build verification."
-        Warn "Verify manually in Visual Studio (Release2023/2024/2025/2026) before pushing."
+        Warn "Verify manually in Visual Studio (Release2023/2024/2025/2026/2027) before pushing."
     }
 }
 

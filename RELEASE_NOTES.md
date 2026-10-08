@@ -32,6 +32,11 @@ Keep entries **short and user-facing**. The in-app updater dialog truncates to 6
 
 ---
 
+## v26.5.0 -- 2026-10-08
+
+### Added
+- **Revit 2027 support.** The nullCarbon Export ribbon now installs for Autodesk Revit 2027 as well as 2023 to 2026. Updating from an earlier version adds Revit 2027 automatically, so there is no need to reinstall.
+
 ## v26.4.3 -- 2026-09-29
 
 ### Fixed
