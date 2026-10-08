@@ -75,10 +75,11 @@ then double-click do\1-build.cmd again.
 }
 $sdks | ForEach-Object { Ok $_ }
 
-$has8  = $sdks | Where-Object { $_ -match '^8\.' }
-$has10 = $sdks | Where-Object { $_ -match '^10\.' }
-if (-not $has8 -and -not $has10) {
-    Warn ".NET SDK 8.x was not found in the list above."
+$sdkMajors  = @($sdks | ForEach-Object { if ($_ -match '^(\d+)\.') { [int]$Matches[1] } })
+$has8OrNewer = @($sdkMajors | Where-Object { $_ -ge 8 }).Count -gt 0
+$has10       = @($sdkMajors | Where-Object { $_ -ge 10 }).Count -gt 0
+if (-not $has8OrNewer) {
+    Warn ".NET SDK 8.x or newer was not found in the list above."
     Warn "Release2025 and Release2026 may fail to build."
     Warn "Install SDK 8 with:"
     Warn "    winget install --id Microsoft.DotNet.SDK.8"

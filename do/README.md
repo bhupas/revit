@@ -4,7 +4,7 @@ Five files in this folder. **Numbered in the order you'll typically use them.** 
 
 | # | File | What it does | When to click |
 |---|---|---|---|
-| **0** | **`0-install-prerequisites.cmd`** | Auto-installs .NET SDK 8 + .NET 4.8 Dev Pack + WiX v5 + GitHub CLI via winget / dotnet tool. Idempotent — skips anything already installed. | **First time on a fresh machine**, then never again. |
+| **0** | **`0-install-prerequisites.cmd`** | Auto-installs .NET SDK 8 + .NET SDK 10 + .NET 4.8 Dev Pack + WiX v5 + GitHub CLI via winget / dotnet tool. Idempotent — skips anything already installed. | **First time on a fresh machine**, then never again. |
 | **1** | **`1-build.cmd`** | Build the add-in for Revit 2023 + 2024 + 2025 + 2026 + 2027 | After making code changes |
 | **2** | **`2-installer.cmd`** | Package the `.msi` installer | After `1-build.cmd`, when you want to test the installer locally |
 | **3** | **`3-release.cmd`** | **Interactive release wizard.** Prompts for version + push y/n + confirms, then does build + installer + tag + (push). | When you want to **ship a new version**. Replaces 1+2 — does it all. |
@@ -25,6 +25,7 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for the full picture and the branch pr
 Just double-click **`0-install-prerequisites.cmd`**. It checks for and installs:
 
 - .NET SDK 8 (`winget install --id Microsoft.DotNet.SDK.8`)
+- .NET SDK 10 (`winget install --id Microsoft.DotNet.SDK.10`) -- Revit 2027 runs on .NET 10
 - .NET Framework 4.8 Developer Pack (winget if available, otherwise opens the manual download page)
 - WiX v5 (`dotnet tool install --global wix`) -- used by `scripts\build-installer.ps1`
 - GitHub CLI (`winget install --id GitHub.cli`) -- used by `scripts\protect-branches.ps1`

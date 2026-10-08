@@ -14,8 +14,10 @@
 
   2. Silent (auto-updater runs `msiexec /i <file> /qn /norestart`):
         No UI. MajorUpgrade preserves the feature selection from the
-        previous install so subsequent silent upgrades only touch the
-        Revit versions the user originally picked.
+        previous install, so Revit versions the user turned off stay off.
+        A Revit year that is new in this MSI (e.g. 2027) has no previous
+        state to migrate, so it installs by default (Level="1"): existing
+        users get it added by the auto-updater without reinstalling.
 
   Layout:
     %LocalAppData%\nullCarbon-LCA-Export\          (main install)

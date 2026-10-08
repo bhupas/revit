@@ -45,6 +45,7 @@ See [`do\README.md`](do/README.md) for examples and the first-time install comma
 
 ```cmd
 winget install --id Microsoft.DotNet.SDK.8 --silent --accept-package-agreements --accept-source-agreements
+winget install --id Microsoft.DotNet.SDK.10 --silent --accept-package-agreements --accept-source-agreements
 winget install --id Microsoft.DotNet.Framework.DeveloperPack_4 --silent --accept-package-agreements --accept-source-agreements
 dotnet tool install --global wix
 ```
